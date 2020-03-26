@@ -85,11 +85,9 @@ const market = program
     if (!provider.pairs.includes(pair))
       return error('Pair not suppported by the selcted provider');
 
-    if (!market.selected && market.pair !== pair)
-      state.set({ market: { selected: true, pair } });
-
+    state.set({ market: { selected: true, pair } });
     //TODO: Fetch the price from the daemon
-    log(`Selected market: ${pair}`);
+    log(`Current market: ${pair}`);
   });
 
 market
@@ -98,8 +96,8 @@ market
   .action(() => {
     info('=========*** Market ***==========\n');
 
-    const { provider } = state.get();
-    provider.pairs.forEach(p => log(p))
+    const { provider, market } = state.get();
+    provider.pairs.forEach(p => p === market.pair ? success(`${p} (selected)`) : log(p))
   })
 
 market
