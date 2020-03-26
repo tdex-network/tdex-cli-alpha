@@ -89,8 +89,7 @@ const market = program
       state.set({ market: { selected: true, pair } });
 
     //TODO: Fetch the price from the daemon
-    log(`Current market: ${pair}`);
-    success(`Price: 1 asset_a is equal to X asset_b at timestamp`);
+    log(`Selected market: ${pair}`);
   });
 
 market
