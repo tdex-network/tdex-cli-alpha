@@ -18,8 +18,10 @@ import State from './state';
 import { isValidUrl } from './helpers';
 
 const pkg = require('../package.json');
-const state = new State({ path: path.resolve(__dirname, "../state.json") })
-//Loggers
+
+const state = new State({ path: path.resolve(__dirname, "../state.json") });
+
+const NETWORKS = ['liquid','regtest'];
 
 //const w = fromWIF("cNiZ5A2UgR11Kw79QsgqeziPJLXVnftGVBmeHZag53RcvDod5SsW", "regtest");
 //console.log(w.address)
@@ -33,22 +35,39 @@ program
   .action(() => {
     info('=========*** Info ***==========\n')
 
-    const { market, provider } = state.get();
+    const { market, provider, network } = state.get();
+
+    if (network.selected) 
+      log(`Network: ${network.chain}`)
 
     if (provider.selected)
       log(`Endpoint: ${provider.endpoint}`);
 
     if (market.selected)
       log(`Market: ${market.pair}`);
+    
+  })
 
+/**
+ * Network
+ */
+program
+  .command('network <chain>')
+  .description('Select the network. Avialable chains: ' + NETWORKS )
+  .action((chain) => {
+    if (!NETWORKS.includes(chain))
+      return error('Invalid network');
 
+    state.set({ network: { selected: true, chain } })
+
+    return log(`Current network: ${chain}`)
   })
 /**
  * Connect
  */
 program
   .command('connect <endpoint>')
-  .description('Select the default liquidity provider')
+  .description('Select the liquidity provider')
   .action((endpoint) => {
     info('=========*** Provider ***==========\n')
 
@@ -68,7 +87,7 @@ program
 
 const market = program
   .command('market <pair>')
-  .description('Select the default asset pair to use for the swap')
+  .description('Select the asset pair to use for the swap')
   .action((pair) => {
     info('=========*** Market ***==========\n');
 
@@ -122,6 +141,11 @@ program
   .action((wif) => {
     info('=========*** Wallet ***==========');
 
+    let wallet
+    if (wif) {
+      wallet = fromWIF(wif, )
+    }
+    log(`Public key: ${market.pair}`);
 
   });
 

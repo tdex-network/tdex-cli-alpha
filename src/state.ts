@@ -10,8 +10,10 @@ export interface StateInterface {
 }
 
 export interface StateObjectInterface {
+  network: StateNetworkInterface,
   provider: StateProviderInterface,
-  market: StateMarketInterface
+  market: StateMarketInterface,
+  wallet: Object,
 }
 
 export interface StateProviderInterface {
@@ -27,7 +29,16 @@ export interface StateMarketInterface {
   price: Object
 }
 
+export interface StateNetworkInterface {
+  selected: Boolean,
+  chain: String
+}
+
 const initialState = {
+  network: {
+    selected: false,
+    chain: ""
+  },
   provider: {
     selected: false,
     endpoint: "",
@@ -40,6 +51,13 @@ const initialState = {
     price: {
       timestamp: null,
       value: null
+    }
+  },
+  wallet: {
+    selected: false,
+    keystore: {
+      type:  "",
+      value: ""
     }
   }
 }
