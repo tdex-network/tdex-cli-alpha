@@ -3,8 +3,8 @@ import { mergeDeep } from './helpers';
 
 export interface StateInterface {
   state: StateObjectInterface,
-  stateSerialized: String,
-  path: String,
+  stateSerialized: string,
+  path: string,
   set(newState: Object): void,
   get(): StateObjectInterface
 }
@@ -13,25 +13,25 @@ export interface StateObjectInterface {
   network: StateNetworkInterface,
   provider: StateProviderInterface,
   market: StateMarketInterface,
-  wallet: Object,
+  wallet: any,
 }
 
 export interface StateProviderInterface {
   selected: Boolean,
-  endpoint: String,
-  pubkey: String,
+  endpoint: string,
+  pubkey: string,
   pairs: Array<string>
 }
 
 export interface StateMarketInterface {
   selected: Boolean,
-  pair: String,
+  pair: string,
   price: Object
 }
 
 export interface StateNetworkInterface {
   selected: Boolean,
-  chain: String
+  chain: string
 }
 
 const initialState = {
@@ -55,6 +55,8 @@ const initialState = {
   },
   wallet: {
     selected: false,
+    pubkey: "",
+    address: "",
     keystore: {
       type:  "",
       value: ""

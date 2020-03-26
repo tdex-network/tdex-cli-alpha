@@ -15,6 +15,7 @@
   "dependencies": {
     "chalk": "^3.0.0",
     "commander": "^5.0.0",
+    "enquirer": "^2.3.4",
     "liquidjs-lib": "vulpemventures/liquidjs-lib"
   },
   "devDependencies": {

@@ -11,7 +11,7 @@ import * as path from 'path';
 import { program } from 'commander';
 
 //Components
-import Wallet, { fromWIF } from './wallet';
+import walletAction from './actions/walletAction';
 import { log, error, info, success } from './logger';
 import State from './state';
 //Helpers
@@ -21,10 +21,7 @@ const pkg = require('../package.json');
 
 const state = new State({ path: path.resolve(__dirname, "../state.json") });
 
-const NETWORKS = ['liquid','regtest'];
-
-//const w = fromWIF("cNiZ5A2UgR11Kw79QsgqeziPJLXVnftGVBmeHZag53RcvDod5SsW", "regtest");
-//console.log(w.address)
+const NETWORKS = ['liquid', 'regtest'];
 
 program
   .version(pkg.version)
@@ -37,7 +34,7 @@ program
 
     const { market, provider, network } = state.get();
 
-    if (network.selected) 
+    if (network.selected)
       log(`Network: ${network.chain}`)
 
     if (provider.selected)
@@ -45,7 +42,7 @@ program
 
     if (market.selected)
       log(`Market: ${market.pair}`);
-    
+
   })
 
 /**
@@ -53,7 +50,7 @@ program
  */
 program
   .command('network <chain>')
-  .description('Select the network. Avialable chains: ' + NETWORKS )
+  .description('Select the network. Avialable chains: ' + NETWORKS)
   .action((chain) => {
     if (!NETWORKS.includes(chain))
       return error('Invalid network');
@@ -136,18 +133,9 @@ market
  */
 
 program
-  .command('wallet [wif]')
-  .description('Create new key pair or import from WIF')
-  .action((wif) => {
-    info('=========*** Wallet ***==========');
-
-    let wallet
-    if (wif) {
-      wallet = fromWIF(wif, )
-    }
-    log(`Public key: ${market.pair}`);
-
-  });
+  .command('wallet')
+  .description('Create new key pair or restore from WIF')
+  .action(walletAction);
 
 /**
  * swap

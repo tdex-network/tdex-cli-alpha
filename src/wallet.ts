@@ -22,7 +22,7 @@ export default class Wallet implements WalletInterface {
   network: Network;
 
   constructor(args: any) {
-    const { network, keyPair }: { network: string, keyPair: ECPairInterface } = args;
+    const { network, keyPair }: { network: string, keyPair: ECPairInterface | undefined } = args;
 
     if (!keyPair)
       this.keyPair = ECPair.makeRandom({
@@ -76,17 +76,28 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
   }
 }
 
+const iv = Buffer.alloc(16, 0);
 
 export function encrypt(payload, password) {
-  const key = crypto.createCipher('aes-256-cbc', password);
+  const hash = crypto
+    .createHash("sha1")
+    .update(password);
+
+  const secret = hash.digest().slice(0, 16);
+  const key = crypto.createCipheriv('aes-128-cbc', secret, iv);
   let encrypted = key.update(payload, 'utf8', 'hex');
   encrypted += key.final('hex');
-  
+
   return encrypted;
 }
 
 export function decrypt(encrypted, password) {
-  const key = crypto.createDecipher('aes-256-cbc', password);
+  const hash = crypto
+  .createHash("sha1")
+  .update(password);
+  
+  const secret = hash.digest().slice(0, 16);
+  const key = crypto.createDecipheriv('aes-128-cbc', secret, iv);
   let decrypted = key.update(encrypted, 'hex', 'utf8')
   decrypted += key.final('utf8');
 

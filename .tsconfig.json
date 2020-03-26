@@ -5,9 +5,7 @@
     "outDir": "./dist",
     "sourceMap": false,
     "strict": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "esModuleInterop": true
   },
   "include": [
     "src/*.ts"
