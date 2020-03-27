@@ -1,6 +1,6 @@
 import * as path from 'path';
 import State from '../state';
-import { info, log, error } from '../logger';
+import { info, log, error, success } from '../logger';
 import Wallet, { encrypt, WalletInterface, fromWIF } from '../wallet';
 
 
@@ -9,7 +9,7 @@ const state = new State({ path: path.resolve(__dirname, "../../state.json") });
 
 
 export default function () {
-  info('=========*** Wallet Setup ***==========');
+  info('=========*** Wallet ***==========\n');
 
   const { network, wallet } = state.get();
 
@@ -63,10 +63,6 @@ export default function () {
               storageType,
               encrypt(walletFromScratch.keyPair.toWIF(), password)
             );
-
-            return log(
-              `Public key ${walletFromScratch.publicKey}\nAddress ${walletFromScratch.address}`
-            );
           }).catch(error);
         else
           setWalletState(
@@ -80,7 +76,7 @@ export default function () {
       privatekey.run().then(wif => {
 
         const restoredWallet: WalletInterface = fromWIF(wif, network.chain);
-        
+
         type.run().then(storageType => {
           if (storageType === "encrypted")
             password.run().then(password => {
@@ -91,10 +87,7 @@ export default function () {
                 storageType,
                 encrypt(wif, password)
               );
-
-              return log(
-                `Public key ${restoredWallet.publicKey}\nAddress ${restoredWallet.address}`
-              );
+              
             }).catch(error);
           else
             setWalletState(
