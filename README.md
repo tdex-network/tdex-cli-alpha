@@ -36,10 +36,27 @@ $ tdex-cli wallet
 * Run again to get current pubkey and address
 ```sh
 $ tdex-cli wallet
-=========*** Wallet ***==========
+```
 
-Public key 02df46a7074ea5ba872393560d208416369800c4c187344b74874bfd857a3c44ef
-Address ert1qgzeyqlelkg38d320eh06jl3suwp86565t5ngcm
+* Get Wallet Balance
+```sh
+$ tdex-cli wallet balance
+```
+
+* Start a swap
+
+```sh
+$ tdex-cli swap 
+=========*** Swap ***==========
+
+✔ Which asset do you want to send? · USDT / LBTC
+✔ How much do you want to send? · 600
+Gotcha! You will send USDT 600 and receive circa LBTC 0.1002 based on current market rate
+✔ Are you sure continue? (y/N) · true
+
+Sending Swap Proposal to provider...
+
+Swap succesful!
 ```
 
 ## Development
