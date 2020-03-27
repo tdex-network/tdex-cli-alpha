@@ -1,5 +1,4 @@
 import { ECPair, networks, payments, Psbt } from 'liquidjs-lib';
-import * as crypto from 'crypto';
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';
@@ -76,30 +75,3 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
   }
 }
 
-const iv = Buffer.alloc(16, 0);
-
-export function encrypt(payload, password) {
-  const hash = crypto
-    .createHash("sha1")
-    .update(password);
-
-  const secret = hash.digest().slice(0, 16);
-  const key = crypto.createCipheriv('aes-128-cbc', secret, iv);
-  let encrypted = key.update(payload, 'utf8', 'hex');
-  encrypted += key.final('hex');
-
-  return encrypted;
-}
-
-export function decrypt(encrypted, password) {
-  const hash = crypto
-  .createHash("sha1")
-  .update(password);
-  
-  const secret = hash.digest().slice(0, 16);
-  const key = crypto.createDecipheriv('aes-128-cbc', secret, iv);
-  let decrypted = key.update(encrypted, 'hex', 'utf8')
-  decrypted += key.final('utf8');
-
-  return decrypted;
-}
