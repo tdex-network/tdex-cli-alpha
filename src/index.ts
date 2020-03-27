@@ -88,8 +88,8 @@ wallet
  * swap
  */
 program
-  .command('swap <amount> <asset>')
-  .description('Make a swap proposal of <amount> <asset>')
+  .command('swap')
+  .description('Make a swap proposal')
   .action(swapAction);
 
 

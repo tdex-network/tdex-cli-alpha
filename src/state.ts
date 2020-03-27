@@ -21,13 +21,14 @@ export interface StateProviderInterface {
   selected: Boolean,
   endpoint: string,
   pubkey: string,
+  markets: Object,
   pairs: Array<string>
 }
 
 export interface StateMarketInterface {
   selected: Boolean,
   pair: string,
-  price: Object
+  assets: Object
 }
 
 export interface StateNetworkInterface {
@@ -46,15 +47,13 @@ const initialState = {
     selected: false,
     endpoint: "",
     pubkey: "",
+    markets: {},
     pairs: []
   },
   market: {
     selected: false,
     pair: "",
-    price: {
-      timestamp: null,
-      value: null
-    }
+    assets: {}
   },
   wallet: {
     selected: false,

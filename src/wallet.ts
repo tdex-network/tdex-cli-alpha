@@ -1,4 +1,6 @@
+import axios from 'axios';
 import { ECPair, networks, payments, Psbt } from 'liquidjs-lib';
+
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';
@@ -75,4 +77,24 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
 
   }
 }
+
+
+export async function fetchBalances(address: string, url: string) {
+  const utxos = (await axios.get(`${url}/address/${address}/utxo`)).data;
+  return utxos.reduce((storage: { [x: string]: any; }, item: { [x: string]: any; value: any; }) => {
+    // get the first instance of the key by which we're grouping
+    var group = item["asset"];
+
+    // set `storage` for this instance of group to the outer scope (if not empty) or initialize it
+    storage[group] = storage[group] || 0;
+
+    // add this item to its group within `storage`
+    storage[group] += (item.value);
+
+    // return the updated storage to the reduce function, which will then loop through the next 
+    return storage;
+  }, {}); // {} is the initial value of the storage
+}
+
+
 
