@@ -47,8 +47,8 @@ export default function () {
 
 
   
-  let toBeSent, toReceive
-  toggle.run().then(isTickerA => {
+  let toBeSent:string, toReceive:string
+  toggle.run().then((isTickerA:Boolean) => {
     if (isTickerA) {
       toBeSent = tickerA;
       toReceive = tickerB;
@@ -58,13 +58,13 @@ export default function () {
     }
 
     return amount.run();
-  }).then(amountToBeSent => {
+  }).then((amountToBeSent: number) => {
 
     const amountToReceive = amountToBeSent * (toBeSent === 'LBTC' ? 6000 : 0.000167);
     log(`Gotcha! You will send ${toBeSent} ${amountToBeSent} and receive circa ${toReceive} ${amountToReceive} based on current market rate`);
 
     return confirm.run()
-  }).then(keepGoing => {
+  }).then((keepGoing: Boolean) => {
     if (!keepGoing)
       return log('Terminated');
     

@@ -14,7 +14,7 @@ export default function(pair:string):void {
   if (!provider.pairs.includes(pair))
     return error('Pair not suppported by the selcted provider');
 
-  const assets = provider.markets[pair];
+  const assets = (provider.markets as any)[pair];
   state.set({ market: { selected: true, pair, assets } });
 
   log(`Current market: ${pair}`);
