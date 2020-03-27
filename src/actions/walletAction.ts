@@ -13,6 +13,7 @@ export default function () : void {
   info('=========*** Wallet ***==========\n');
 
   const { network, wallet } = state.get();
+  
   if (!network.selected)
     return error("Select a valid network");
 

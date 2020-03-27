@@ -6,13 +6,15 @@ import connectAction from './connectAction';
 import marketPriceAction from './marketPriceAction';
 
 import walletAction from './walletAction';
+import walletBalanceAction from './walletBalanceAction';
 
 export {
   connectAction,
-  walletAction,
   infoAction,
   networkAction,
   marketAction,
   marketPriceAction,
-  marketListAction
+  marketListAction,
+  walletAction,
+  walletBalanceAction
 };

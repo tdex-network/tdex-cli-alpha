@@ -13,6 +13,7 @@
     "unit": "npx mocha tests/**/*.js"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "commander": "^5.0.0",
     "enquirer": "^2.3.4",

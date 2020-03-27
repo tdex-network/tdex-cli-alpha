@@ -18,9 +18,11 @@ import {
   marketAction, 
   marketListAction, 
   connectAction,
-  marketPriceAction
+  marketPriceAction,
+  walletBalanceAction
 } from './actions';
 import { NETWORKS } from './helpers';
+
 
 
 const pkg = require('../package.json');
@@ -79,10 +81,10 @@ const wallet = program
   .description('Create new key pair or restore from WIF')
   .action(walletAction);
 
-/* wallet
+wallet
   .command('balance')
   .description('Show current wallet balance')
-  .action(walletBalace) */
+  .action(walletBalanceAction)
 
 /**
  * swap
