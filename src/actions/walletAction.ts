@@ -1,22 +1,20 @@
-// @ts-nocheck
-import * as path from 'path';
-import State from '../state';
-import { info, log, error, success } from '../logger';
+import { info, log, error } from '../logger';
 import Wallet, { WalletInterface, fromWIF } from '../wallet';
-import * as crypto from 'crypto';
+import {encrypt} from '../crypto';
 
 
 const enquirer = require('enquirer');
-const state = new State({ path: path.resolve(__dirname, "../../state.json") });
+
+import State from '../state';
+const state = new State();
 
 
-export default function () {
+export default function () : void {
   info('=========*** Wallet ***==========\n');
 
   const { network, wallet } = state.get();
-
   if (!network.selected)
-    return error("Select a valid network")
+    return error("Select a valid network");
 
   if (wallet.selected)
     return log(`Public key ${wallet.pubkey}\nAddress ${wallet.address}`);
@@ -49,15 +47,15 @@ export default function () {
     message: 'Type your private key WIF (Wallet Import Format)'
   })
 
-  restore.run().then(restoreFromWif => {
+  restore.run().then((restoreFromWif: Boolean) => {
 
     if (!restoreFromWif) {
 
       const walletFromScratch: WalletInterface = new Wallet({ network: network.chain });
-      type.run().then(storageType => {
+      type.run().then((storageType:string) => {
 
         if (storageType === "encrypted")
-          password.run().then(password => {
+          password.run().then((password:string) => {
 
             setWalletState(
               walletFromScratch.publicKey,
@@ -75,13 +73,13 @@ export default function () {
           );
       });
     } else {
-      privatekey.run().then(wif => {
+      privatekey.run().then((wif:string) => {
 
         const restoredWallet: WalletInterface = fromWIF(wif, network.chain);
 
-        type.run().then(storageType => {
+        type.run().then((storageType:string) => {
           if (storageType === "encrypted")
-            password.run().then(password => {
+            password.run().then((password:string) => {
 
               setWalletState(
                 restoredWallet.publicKey,
@@ -107,7 +105,7 @@ export default function () {
 }
 
 
-function setWalletState(pubkey, address, type, value) {
+function setWalletState(pubkey:string, address:string, type:string, value:string):void {
   state.set({
     wallet: {
       selected: true,
@@ -119,32 +117,4 @@ function setWalletState(pubkey, address, type, value) {
       }
     }
   });
-}
-
-const iv = Buffer.alloc(16, 0);
-
-export function encrypt(payload, password) {
-  const hash = crypto
-    .createHash("sha1")
-    .update(password);
-
-  const secret = hash.digest().slice(0, 16);
-  const key = crypto.createCipheriv('aes-128-cbc', secret, iv);
-  let encrypted = key.update(payload, 'utf8', 'hex');
-  encrypted += key.final('hex');
-
-  return encrypted;
-}
-
-export function decrypt(encrypted, password) {
-  const hash = crypto
-  .createHash("sha1")
-  .update(password);
-  
-  const secret = hash.digest().slice(0, 16);
-  const key = crypto.createDecipheriv('aes-128-cbc', secret, iv);
-  let decrypted = key.update(encrypted, 'hex', 'utf8')
-  decrypted += key.final('utf8');
-
-  return decrypted;
 }

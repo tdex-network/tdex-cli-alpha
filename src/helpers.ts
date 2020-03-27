@@ -1,6 +1,12 @@
 // @ts-nocheck
 import { URL } from 'url';
 
+export const NETWORKS = {
+  "liquid" : "https://blockstream.info/liquid/api",
+  "regtest": "https://nigiri.network/liquid/api"
+}
+
+
 export function isValidUrl(s) {
   try {
     new URL(s);

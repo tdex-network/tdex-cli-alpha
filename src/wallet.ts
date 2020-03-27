@@ -59,6 +59,7 @@ export default class Wallet implements WalletInterface {
   }
 }
 
+
 export function fromWIF(wif: string, network?: string): WalletInterface {
 
   const _network = network ? (networks as any)[network] : networks.liquid
@@ -74,4 +75,5 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
 
   }
 }
+
 
