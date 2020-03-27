@@ -8,6 +8,8 @@ import marketPriceAction from './marketPriceAction';
 import walletAction from './walletAction';
 import walletBalanceAction from './walletBalanceAction';
 
+import swapAction from './swapAction';
+
 export {
   connectAction,
   infoAction,
@@ -16,5 +18,6 @@ export {
   marketPriceAction,
   marketListAction,
   walletAction,
-  walletBalanceAction
+  walletBalanceAction,
+  swapAction
 };
