@@ -76,4 +76,3 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
   }
 }
 
-
