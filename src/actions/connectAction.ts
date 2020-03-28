@@ -12,7 +12,8 @@ export default function (endpoint: string): void {
   if (!isValidUrl(endpoint))
     return error('The provided endpoint URL is not valid');
 
-  // TODO: Connect to provided endpoint and fetch the available pairs along with his pubkey
+  // TODO: Connect to provided endpoint and fetch the available pairs
+  // client.Markets().then()
   const markets = {
     "LBTC-USDT": {
       "LBTC": "5ac9f65c0efcc4775e0baec4ec03abdde22473cd3cf33c0419ca290e0751b225",

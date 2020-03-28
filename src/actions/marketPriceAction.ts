@@ -15,5 +15,9 @@ export default function():void {
     return error('A market is required. Select one with market <pair> command');
 
   log(`Current market: ${market.pair}`);
+
+  // client.Balances(market.pair).then() 
+  // It should return the provider's balance for each ticker in the pair. 
+  // Would be convenient to have the market rate pre-calculated. 
   log(`Price: 1 asset_a is equal to X asset_b at timestamp`);
 }
