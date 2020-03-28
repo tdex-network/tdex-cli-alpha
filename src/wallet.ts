@@ -78,9 +78,35 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
   }
 }
 
+async function fetchUtxos(address:string, url:string) {
+  return (await axios.get(`${url}/address/${address}/utxo`)).data
+}
+
+export async function createTx(address:string, asset:string, url:string): Promise<string> {
+  let psbt = new Psbt();
+
+  const utxos   = await fetchUtxos(address, url)
+  const inputs  = utxos.filter((utxo: any) => utxo.asset === asset);
+
+/*   inputs.forEach(i => psbt.addInput({
+    // if hash is string, txid, if hash is Buffer, is reversed compared to txid
+    hash: i.txid,
+    index: i.vout,
+    //The scriptPubkey and the value only are needed.
+    witnessUtxo: {
+      script: address,
+      value: i.value,
+      nonce: Buffer.from('00', 'hex'),
+      asset: asset
+    }
+  })); */
+  //outputs.forEach(o => psbt.addOutput({...o}));
+  return psbt.toBase64()
+} 
+
 
 export async function fetchBalances(address: string, url: string) {
-  const utxos = (await axios.get(`${url}/address/${address}/utxo`)).data;
+  const utxos = await fetchUtxos(address, url);
   return utxos.reduce((storage: { [x: string]: any; }, item: { [x: string]: any; value: any; }) => {
     // get the first instance of the key by which we're grouping
     var group = item["asset"];

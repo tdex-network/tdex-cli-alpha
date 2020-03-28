@@ -1,4 +1,5 @@
 import { info, log, error, success } from '../logger';
+import { createTx } from '../wallet';
 import { makeid } from '../helpers';
 import State from '../state';
 const state = new State();
@@ -16,7 +17,7 @@ export default function () {
   info('=========*** Swap ***==========\n');
 
 
-  const { wallet, provider, market } = state.get();
+  const { wallet, provider, market, network } = state.get();
 
   if (!provider.selected)
     return error('A provider is required. Select one with connect <endpoint> command');
@@ -75,18 +76,16 @@ export default function () {
     if (!keepGoing)
       return log('Terminated');
 
-
-
     // Wait for the stream with either the SwapAccet or SwapFail message
     // We are going to send somethin like 
-    const unsignedPsbt = "";
+    const unsignedPsbt = createTx(wallet.address, (market.assets as any), network.explorer);
     const TradeRequest = {
       SwapRequest: {
         id: makeid(8),
         amount_p: amountToBeSent,
-        asset_p: market.assets[toBeSent],
+        asset_p: (market.assets as any)[toBeSent],
         amount_r: amountToReceive,
-        asset_r: market.assets[toReceive],
+        asset_r: (market.assets as any)[toReceive],
         transaction: unsignedPsbt
       }
     }
