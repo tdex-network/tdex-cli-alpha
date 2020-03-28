@@ -1,6 +1,6 @@
 const { describe, it } =require('mocha');
 const assert = require('assert');
-const wallet = require('../src/wallet');
+const wallet = require('../dist/wallet');
 
 describe('wallet', () => {
   it('fromWIF', () => {

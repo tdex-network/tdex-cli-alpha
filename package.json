@@ -1,15 +1,22 @@
 {
   "name": "alpha-wallet",
   "version": "1.0.0",
-  "author": "Vulpem Ventures",
+  "contributors": [
+    {
+      "name": "Marco Argentieri",
+      "email": "marco@vulpem.com",
+      "url": "https://vulpem.com"
+    }
+  ],
   "license": "MIT",
   "bin": {
     "tdex-cli": "./dist/index.js"
   },
+  "files": ["dist"],
   "scripts": {
     "build": "npx tsc -p ./.tsconfig.json",
     "clean": "npx rimraf dist",
-    "test": "npm run build && npm run unit",
+    "test": "npm run clean && npm run build && npm run unit",
     "unit": "npx mocha tests/**/*.js"
   },
   "dependencies": {
