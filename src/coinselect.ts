@@ -29,7 +29,7 @@ function transactionBytes (vin, vout) {
 
 
 
-function calculateFees(vin, vout, opts = {}) {
+export function calculateFees(vin, vout, opts = {}) {
   const satPerByte = opts.satPerByte ? opts.satPerByte : 1;
   const rate = opts.rate ? opts.rate : 10;
 

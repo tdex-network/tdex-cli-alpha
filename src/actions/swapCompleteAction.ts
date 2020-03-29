@@ -1,6 +1,6 @@
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { WalletInterface, fromWIF, fetchUtxos } from '../wallet';
+import { WalletInterface, fromWIF } from '../wallet';
 import { decrypt } from '../crypto';
 import { makeid } from '../helpers';
 const state = new State();
@@ -9,7 +9,7 @@ const { Confirm, Password } = require('enquirer');
 
 const confirm = new Confirm({
   name: 'question',
-  message: 'Do you accept the proposed terms?'
+  message: 'Are you sure to confirm?'
 });
 const password = new Password({
   type: 'password',
@@ -18,7 +18,7 @@ const password = new Password({
 });
 
 
-export default function (message: string): void {
+export default function (message: string, cmdObj:any): void {
   info('=========*** Swap ***==========\n');
 
   const { wallet, network } = state.get();
@@ -30,15 +30,10 @@ export default function (message: string): void {
   try {
     json = JSON.parse(message);
   } catch (ignore) {
-    return error('Not a valid SwapRequest message');
+    return error('Not a valid SwapAccept message');
   }
 
-  log(JSON.stringify(json, undefined, 2));
-  log();
-
   const psbtBase64 = json.transaction;
-
-
   let walletInstance: WalletInterface;
 
   confirm.run().then((keepGoing: Boolean) => {
@@ -57,32 +52,21 @@ export default function (message: string): void {
 
     walletInstance = fromWIF(wif, network.chain);
 
-    return fetchUtxos(walletInstance.address, network.explorer)
-  }).then((utxos: Array<any>) => {
-    // Add inputs and putputs to psbt 
-
-    const unsignedPsbt = walletInstance.updateTx(
-      psbtBase64,
-      utxos,
-      json.amount_r,
-      json.amount_p,
-      json.asset_r,
-      json.asset_p
-    );
-
     log("\nSigning with private key...");
-    return walletInstance.sign(unsignedPsbt);
+    return walletInstance.sign(psbtBase64);
   }).then((signedPsbt: string) => {
     success("\n√ Done\n");
 
-    const TradeReply = {
-      SwapAccept: {
+    const TradeCompleteRequest = {
+      SwapComplete: {
         id: makeid(8),
-        request_id: json.id,
+        accept_id: json.id,
         transaction: signedPsbt
       }
     };
 
-    success(`\nSwapAccept message\n\n${JSON.stringify(TradeReply.SwapAccept)}`);
+    success(`\nSwapComplete message\n\n${JSON.stringify(TradeCompleteRequest.SwapComplete)}`);
+    if (cmdObj.push)
+      log(walletInstance.toHex(signedPsbt));
   }).catch(error)
 }

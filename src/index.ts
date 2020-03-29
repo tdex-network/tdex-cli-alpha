@@ -20,6 +20,7 @@ import {
   walletBalanceAction,
   swapAction,
   swapAcceptAction,
+  swapCompleteAction,
 } from './actions';
 import { NETWORKS } from './helpers';
 
@@ -90,15 +91,21 @@ wallet
  */
 const swap = program
   .command('swap')
-  .option('-v, --verbose', "Show  verbose information", false)
+  .option('-v, --verbose', "Show verbose information", false)
   .option('-l, --local', "Print the SwapRequest message without sending to the provider", false)
   .description('Make a swap proposal')
   .action(swapAction);
 
 swap
   .command('accept <message>')
-  .description('Parse and accept a given SwapRequest proposal')
+  .description('Parse and accept a given SwapRequest message')
   .action(swapAcceptAction)
+
+swap
+  .command('complete <message>')
+  .option('-p, --push', "Extract hex string and broadcast to the chain")
+  .description('Parse and complete a given SwapAccept message')
+  .action(swapCompleteAction)
 
 
 program.parse(process.argv);

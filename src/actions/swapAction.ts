@@ -1,7 +1,7 @@
 import { info, log, error, success } from '../logger';
 import { makeid } from '../helpers';
 import State from '../state';
-import Wallet, { fetchUtxos, WalletInterface, fromWIF } from '../wallet';
+import { fetchUtxos, WalletInterface, fromWIF, createTx } from '../wallet';
 import { decrypt } from '../crypto';
 const state = new State();
 
@@ -71,7 +71,7 @@ export default function (cmdObj: any) {
 
     const execute = cmdObj.local ?
       () => amount(`How much do you want to receive?`).run() :
-      () => Promise.resolve()
+      () => Promise.resolve();
     
     return execute()
   }).then((outputAmountOrNothing: number) => {
@@ -113,7 +113,9 @@ export default function (cmdObj: any) {
     amountToBeSent = Math.floor(amountToBeSent * Math.pow(10,8));
     amountToReceive = Math.floor(amountToReceive * Math.pow(10,8));
 
-    return walletInstance.createTx(
+    const psbtBase64 = createTx();
+    return walletInstance.updateTx(
+      psbtBase64,
       utxos,
       amountToBeSent,
       amountToReceive,

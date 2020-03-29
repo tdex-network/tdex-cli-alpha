@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as PathModule from 'path';
 import { mergeDeep } from './helpers';
 
@@ -59,7 +60,7 @@ const initialState = {
     selected: false,
     pubkey: "",
     address: "",
-    script: Buffer.alloc(0),
+    script: "",
     keystore: {
       type: "",
       value: ""
@@ -73,16 +74,24 @@ export default class State implements StateInterface {
   path: string
   stateSerialized: string
 
-  constructor(args?: any) {
+  constructor() {
 
     let path;
-    if (args && args.path) {
-      if (!PathModule.isAbsolute(args.path))
+    const { TDEX_CLI_PATH } = process.env;
+    if (TDEX_CLI_PATH) {
+      if (!PathModule.isAbsolute(TDEX_CLI_PATH))
         throw "Path must be absolute";
-      path = args.path;
+
+        path = PathModule.resolve(TDEX_CLI_PATH, "state.json");
     } else {
-      //Default relative position
-      path = PathModule.resolve(__dirname, "../state.json");
+      //Default absolute position
+      const homedir = os.homedir();
+      const defaultPath = PathModule.resolve(homedir,".tdex")
+      if (!fs.existsSync(defaultPath)) {
+        fs.mkdirSync(defaultPath);
+      }
+
+      path = PathModule.resolve(defaultPath, "state.json");
     }
 
 

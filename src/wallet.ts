@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ECPair, networks, payments, Psbt, confidential } from 'liquidjs-lib';
 //Libs
-import coinselect from './coinselect'; 
+import coinselect, {calculateFees} from './coinselect';
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';
@@ -13,8 +13,16 @@ export interface WalletInterface {
   address: string;
   script: string;
   network: Network;
-  createTx(inputs: Array<any>, inputAmount:number, outputAmount: number, inputAsset:string, outputAsset:string): string;
-  sign(psbt: string): string;
+  updateTx(
+    psbtBase64: string,
+    inputs: Array<any>,
+    inputAmount: number,
+    outputAmount: number,
+    inputAsset: string,
+    outputAsset: string
+  ): string;
+  sign(psbtBase64: string): string;
+  toHex(psbtBase64: string): string;
 }
 
 export default class Wallet implements WalletInterface {
@@ -48,14 +56,27 @@ export default class Wallet implements WalletInterface {
     this.script = output!.toString('hex');
   }
 
-  createTx(inputs: Array<any>, inputAmount:number, outputAmount: number, inputAsset:string, outputAsset:string): string {
-    //console.log(inputs, inputAmount, outputAmount, inputAsset, outputAsset)
-    let psbt = new Psbt(); 
-    
+
+
+  updateTx(
+    psbtBase64: string,
+    inputs: Array<any>,
+    inputAmount: number,
+    outputAmount: number,
+    inputAsset: string,
+    outputAsset: string): string {
+
+    let psbt: Psbt
+    try {
+      psbt = Psbt.fromBase64(psbtBase64);
+    } catch (ignore) {
+      throw (new Error('Invalid psbt'));
+    }
+
     inputs = inputs.filter((utxo: any) => utxo.asset === inputAsset);
     const { unspents, change } = coinselect(inputs, inputAmount);
-  
-    unspents.forEach((i:any) => psbt.addInput(({
+
+    unspents.forEach((i: any) => psbt.addInput(({
       // if hash is string, txid, if hash is Buffer, is reversed compared to txid
       hash: i.txid,
       index: i.vout,
@@ -70,7 +91,7 @@ export default class Wallet implements WalletInterface {
         nonce: Buffer.from('00', 'hex')
       }
     } as any)));
-  
+
     psbt.addOutput({
       script: Buffer.from(this.script, 'hex'),
       value: confidential.satoshiToConfidentialValue(outputAmount),
@@ -81,7 +102,7 @@ export default class Wallet implements WalletInterface {
       nonce: Buffer.from('00', 'hex')
     });
 
-    if (change > 0) { 
+    if (change > 0) {
       psbt.addOutput({
         script: Buffer.from(this.script, 'hex'),
         value: confidential.satoshiToConfidentialValue(change),
@@ -93,27 +114,42 @@ export default class Wallet implements WalletInterface {
       })
     }
 
+
     const base64 = psbt.toBase64();
     return base64;
-  } 
+  }
 
   sign(psbtBase64: string): string {
-    let psbt
+    let psbt : Psbt;
     try {
       psbt = Psbt.fromBase64(psbtBase64);
     } catch (ignore) {
       throw (new Error('Invalid psbt'));
     }
 
-    psbt.signAllInputs(this.keyPair);
+    const index = psbt.data.inputs.findIndex(p => p.witnessUtxo!.script.toString('hex') === this.script)
 
-    if (!psbt.validateSignaturesOfAllInputs())
+    psbt.signInput(index, this.keyPair);
+
+    if (!psbt.validateSignaturesOfInput(index))
       throw new Error('Invalid signature');
 
-    psbt.finalizeAllInputs();
+    psbt.finalizeInput(index);
 
     return psbt.toBase64();
   }
+
+  toHex(psbtBase64: string): string {
+    let psbt : Psbt;
+    try {
+      psbt = Psbt.fromBase64(psbtBase64);
+    } catch (ignore) {
+      throw (new Error('Invalid psbt'));
+    }
+  
+    return psbt.extractTransaction().toHex();
+  }
+  
 }
 
 
@@ -133,7 +169,13 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
   }
 }
 
-export async function fetchUtxos(address:string, url:string): Promise<any> {
+export function createTx(): string {
+  let psbt = new Psbt();
+
+  return psbt.toBase64()
+}
+
+export async function fetchUtxos(address: string, url: string): Promise<any> {
   return (await axios.get(`${url}/address/${address}/utxo`)).data
 }
 
