@@ -59,6 +59,7 @@ const initialState = {
     selected: false,
     pubkey: "",
     address: "",
+    script: Buffer.alloc(0),
     keystore: {
       type: "",
       value: ""

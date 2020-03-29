@@ -59,16 +59,14 @@ export default function () : void {
           password.run().then((password:string) => {
 
             setWalletState(
-              walletFromScratch.publicKey,
-              walletFromScratch.address,
+              walletFromScratch,
               storageType,
               encrypt(walletFromScratch.keyPair.toWIF(), password)
             );
           }).catch(error);
         else
           setWalletState(
-            walletFromScratch.publicKey,
-            walletFromScratch.address,
+            walletFromScratch,
             storageType,
             walletFromScratch.keyPair.toWIF()
           );
@@ -83,8 +81,7 @@ export default function () : void {
             password.run().then((password:string) => {
 
               setWalletState(
-                restoredWallet.publicKey,
-                restoredWallet.address,
+                restoredWallet,
                 storageType,
                 encrypt(wif, password)
               );
@@ -92,8 +89,7 @@ export default function () : void {
             }).catch(error);
           else
             setWalletState(
-              restoredWallet.publicKey,
-              restoredWallet.address,
+              restoredWallet,
               storageType,
               restoredWallet.keyPair.toWIF()
             );
@@ -106,12 +102,16 @@ export default function () : void {
 }
 
 
-function setWalletState(pubkey:string, address:string, type:string, value:string):void {
+function setWalletState(walletObject: WalletInterface, type:string, value:string):void {
+  const pubkey = walletObject.publicKey;
+  const address = walletObject.address;
+  const script = walletObject.script;
   state.set({
     wallet: {
       selected: true,
       pubkey,
       address,
+      script,
       keystore: {
         type,
         value

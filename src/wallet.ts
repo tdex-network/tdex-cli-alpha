@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { ECPair, networks, payments, Psbt } from 'liquidjs-lib';
-
+import { ECPair, networks, payments, Psbt, confidential } from 'liquidjs-lib';
+//Libs
+import coinselect from './coinselect'; 
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';
@@ -10,7 +11,9 @@ export interface WalletInterface {
   privateKey: string;
   publicKey: string;
   address: string;
+  script: string;
   network: Network;
+  createTx(inputs: Array<any>, inputAmount:number, outputAmount: number, inputAsset:string, outputAsset:string): string;
   sign(psbt: string): string;
 }
 
@@ -20,6 +23,7 @@ export default class Wallet implements WalletInterface {
   privateKey: string;
   publicKey: string;
   address: string;
+  script: string;
   network: Network;
 
   constructor(args: any) {
@@ -36,11 +40,62 @@ export default class Wallet implements WalletInterface {
     this.publicKey = this.keyPair.publicKey!.toString('hex');
 
     this.network = this.keyPair.network;
-    this.address = payments.p2wpkh({
+    const { address, output } = payments.p2wpkh({
       pubkey: this.keyPair.publicKey,
       network: this.network
-    }).address!;
+    });
+    this.address = address!;
+    this.script = output!.toString('hex');
   }
+
+  createTx(inputs: Array<any>, inputAmount:number, outputAmount: number, inputAsset:string, outputAsset:string): string {
+    //console.log(inputs, inputAmount, outputAmount, inputAsset, outputAsset)
+    let psbt = new Psbt(); 
+    
+    inputs = inputs.filter((utxo: any) => utxo.asset === inputAsset);
+    const { unspents, change } = coinselect(inputs, inputAmount);
+  
+    unspents.forEach((i:any) => psbt.addInput(({
+      // if hash is string, txid, if hash is Buffer, is reversed compared to txid
+      hash: i.txid,
+      index: i.vout,
+      //The scriptPubkey and the value only are needed.
+      witnessUtxo: {
+        script: Buffer.from(this.script, 'hex'),
+        asset: Buffer.concat([
+          Buffer.from("01", "hex"), //prefix for unconfidential asset
+          Buffer.from(inputAsset, "hex").reverse(),
+        ]),
+        value: confidential.satoshiToConfidentialValue(i.value),
+        nonce: Buffer.from('00', 'hex')
+      }
+    } as any)));
+  
+    psbt.addOutput({
+      script: Buffer.from(this.script, 'hex'),
+      value: confidential.satoshiToConfidentialValue(outputAmount),
+      asset: Buffer.concat([
+        Buffer.from("01", "hex"), //prefix for unconfidential asset
+        Buffer.from(outputAsset, "hex").reverse(),
+      ]),
+      nonce: Buffer.from('00', 'hex')
+    });
+
+    if (change > 0) { 
+      psbt.addOutput({
+        script: Buffer.from(this.script, 'hex'),
+        value: confidential.satoshiToConfidentialValue(change),
+        asset: Buffer.concat([
+          Buffer.from("01", "hex"), //prefix for unconfidential asset
+          Buffer.from(inputAsset, "hex").reverse(),
+        ]),
+        nonce: Buffer.from('00', 'hex')
+      })
+    }
+
+    const base64 = psbt.toBase64();
+    return base64;
+  } 
 
   sign(psbtBase64: string): string {
     let psbt
@@ -78,31 +133,10 @@ export function fromWIF(wif: string, network?: string): WalletInterface {
   }
 }
 
-async function fetchUtxos(address:string, url:string) {
+export async function fetchUtxos(address:string, url:string): Promise<any> {
   return (await axios.get(`${url}/address/${address}/utxo`)).data
 }
 
-export async function createTx(address:string, asset:string, url:string): Promise<string> {
-  let psbt = new Psbt();
-
-  const utxos   = await fetchUtxos(address, url)
-  const inputs  = utxos.filter((utxo: any) => utxo.asset === asset);
-
-/*   inputs.forEach(i => psbt.addInput({
-    // if hash is string, txid, if hash is Buffer, is reversed compared to txid
-    hash: i.txid,
-    index: i.vout,
-    //The scriptPubkey and the value only are needed.
-    witnessUtxo: {
-      script: address,
-      value: i.value,
-      nonce: Buffer.from('00', 'hex'),
-      asset: asset
-    }
-  })); */
-  //outputs.forEach(o => psbt.addOutput({...o}));
-  return psbt.toBase64()
-} 
 
 
 export async function fetchBalances(address: string, url: string) {

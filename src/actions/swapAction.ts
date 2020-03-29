@@ -1,10 +1,11 @@
 import { info, log, error, success } from '../logger';
-import { createTx } from '../wallet';
 import { makeid } from '../helpers';
 import State from '../state';
+import Wallet, { fetchUtxos, WalletInterface, fromWIF } from '../wallet';
+import { decrypt } from '../crypto';
 const state = new State();
 
-const { Toggle, NumberPrompt, Confirm } = require('enquirer');
+const { Toggle, NumberPrompt, Confirm, Password } = require('enquirer');
 
 // 1. Fetch utxos 
 // 2. CHeck if input amount is enough
@@ -13,7 +14,7 @@ const { Toggle, NumberPrompt, Confirm } = require('enquirer');
 // 5. Sign the final psbt
 // 6. Send SwapComplete back
 
-export default function () {
+export default function (cmdObj: any) {
   info('=========*** Swap ***==========\n');
 
 
@@ -43,10 +44,14 @@ export default function () {
     name: 'question',
     message: 'Are you sure continue?'
   });
+  const password = new Password({
+    type: 'password',
+    name: 'key',
+    message: 'Type your private key WIF (Wallet Import Format)'
+  });
 
-
-
-  let toBeSent: string,
+  let walletInstance: WalletInterface, 
+    toBeSent: string,
     toReceive: string,
     amountToBeSent: number,
     amountToReceive: number;
@@ -68,17 +73,48 @@ export default function () {
     const OneOfTickerB = 6000;
     const OneOfTickerA = 0.000167;
     amountToReceive = amountToBeSent * (toBeSent === 'LBTC' ? OneOfTickerB : OneOfTickerA);
-    const amountToReceiveString = amountToReceive.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 8 })
-    log(`Gotcha! You will send ${toBeSent} ${amountToBeSent} and receive circa ${toReceive} ${amountToReceiveString} based on current market rate`);
+    amountToReceive = Number(
+      amountToReceive
+        .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 8 })
+        .replace(',','')
+    );
+    log(`Gotcha! You will send ${toBeSent} ${amountToBeSent} and receive circa ${toReceive} ${amountToReceive} based on current market rate`);
 
     return confirm.run()
   }).then((keepGoing: Boolean) => {
     if (!keepGoing)
-      return log('Terminated');
+      throw 'Terminated';
+  
+    const execute = wallet.keystore.type === "encrypted" ? 
+      password.run : 
+      () => Promise.resolve(wallet.keystore.value);   
+
+    return execute()
+  }).then((passwordOrWif: string) => {
+
+    const wif = wallet.keystore.type === "encrypted" ? 
+      decrypt(wallet.keystore.value, passwordOrWif) : 
+      passwordOrWif;
+
+    walletInstance  = fromWIF(wif, network.chain);
+
+    return fetchUtxos(walletInstance.address, network.explorer)
+  }).then((utxos: Array<any>) => {
+    // Clean up numbers from fractional to satoshis
+    amountToBeSent = Math.floor(amountToBeSent * Math.pow(10,8));
+    amountToReceive = Math.floor(amountToReceive * Math.pow(10,8));
+
+    return walletInstance.createTx(
+      utxos,
+      amountToBeSent,
+      amountToReceive,
+      (market.assets as any)[toBeSent],
+      (market.assets as any)[toReceive]
+    )
+  }).then((unsignedPsbt: string) => {
 
     // Wait for the stream with either the SwapAccet or SwapFail message
     // We are going to send somethin like 
-    const unsignedPsbt = createTx(wallet.address, (market.assets as any), network.explorer);
     const TradeRequest = {
       SwapRequest: {
         id: makeid(8),
@@ -90,7 +126,8 @@ export default function () {
       }
     }
 
-    info(JSON.stringify(TradeRequest, undefined, 2));
+    if (cmdObj.verbose)
+      info(JSON.stringify(TradeRequest, undefined, 2));
     log(`\nSending SwapRequest to provider...\n`)
     // client.Trade().then( stream => { })
     setTimeout(() => {

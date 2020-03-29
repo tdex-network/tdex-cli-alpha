@@ -89,6 +89,7 @@ wallet
  */
 program
   .command('swap')
+  .option('-v, --verbose', "Show low-level message information", false)
   .description('Make a swap proposal')
   .action(swapAction);
 
