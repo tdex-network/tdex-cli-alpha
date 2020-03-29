@@ -19,6 +19,7 @@ import {
   marketPriceAction,
   walletBalanceAction,
   swapAction,
+  swapAcceptAction,
 } from './actions';
 import { NETWORKS } from './helpers';
 
@@ -87,12 +88,17 @@ wallet
 /**
  * swap
  */
-program
+const swap = program
   .command('swap')
-  .option('-v, --verbose', "Show low-level TradeRequest message information", false)
+  .option('-v, --verbose', "Show  verbose information", false)
   .option('-l, --local', "Print the SwapRequest message without sending to the provider", false)
   .description('Make a swap proposal')
   .action(swapAction);
+
+swap
+  .command('accept <message>')
+  .description('Parse and accept a given SwapRequest proposal')
+  .action(swapAcceptAction)
 
 
 program.parse(process.argv);

@@ -20,14 +20,14 @@ export default function (cmdObj: any) {
 
   const { wallet, provider, market, network } = state.get();
 
-  if (!provider.selected)
+  if (!cmdObj.local && !provider.selected)
     return error('A provider is required. Select one with connect <endpoint> command');
 
   if (!market.selected)
     return error('A market is required. Select one with market <pair> command');
 
   if (!wallet.selected)
-    return error('A wallet is required. Create or restoste with wallet command');
+    return error('A wallet is required. Create or restore with wallet command');
 
 
   const [tickerA, tickerB] = Object.keys(market.assets);
@@ -92,7 +92,7 @@ export default function (cmdObj: any) {
     return confirm.run()
   }).then((keepGoing: Boolean) => {
     if (!keepGoing)
-      throw 'Terminated';
+      throw 'Canceled';
   
     const execute = wallet.keystore.type === "encrypted" ? 
       () => password.run() : 
@@ -139,7 +139,7 @@ export default function (cmdObj: any) {
       info(JSON.stringify(TradeRequest, undefined, 2));
 
     if (cmdObj.local) 
-      return success(`\nSwapRequest message\n\n${JSON.stringify(TradeRequest.SwapRequest, undefined, 2)}`);
+      return success(`\nSwapRequest message\n\n${JSON.stringify(TradeRequest.SwapRequest)}`);
 
     log(`\nSending SwapRequest to provider...\n`)
     // client.Trade().then( stream => { })
