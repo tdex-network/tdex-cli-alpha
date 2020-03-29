@@ -36,7 +36,7 @@ export default function (cmdObj: any) {
     enabled: tickerA,
     disabled: tickerB
   });
-  const amount = (message) => new NumberPrompt({
+  const amount = (message:string) => new NumberPrompt({
     name: 'number',
     message
   });

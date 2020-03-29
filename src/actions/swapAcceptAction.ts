@@ -10,7 +10,7 @@ const confirm = new Confirm({
 });
 
 
-export default function (message): void {
+export default function (message: string): void {
   info('=========*** Swap ***==========\n');
 
   const { wallet } = state.get();
