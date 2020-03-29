@@ -128,6 +128,10 @@ export default function (cmdObj: any) {
 
     if (cmdObj.verbose)
       info(JSON.stringify(TradeRequest, undefined, 2));
+
+    if (cmdObj.local) 
+      return success(`\nSwapRequest message\n\n${JSON.stringify(TradeRequest.SwapRequest, undefined, 2)}`);
+
     log(`\nSending SwapRequest to provider...\n`)
     // client.Trade().then( stream => { })
     setTimeout(() => {

@@ -90,6 +90,7 @@ wallet
 program
   .command('swap')
   .option('-v, --verbose', "Show low-level message information", false)
+  .option('-v, --local', "Print the SwapRequest without sending to provider", false)
   .description('Make a swap proposal')
   .action(swapAction);
 
