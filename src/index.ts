@@ -89,8 +89,8 @@ wallet
  */
 program
   .command('swap')
-  .option('-v, --verbose', "Show low-level message information", false)
-  .option('-v, --local', "Print the SwapRequest without sending to provider", false)
+  .option('-v, --verbose', "Show low-level TradeRequest message information", false)
+  .option('-l, --local', "Print the SwapRequest message without sending to the provider", false)
   .description('Make a swap proposal')
   .action(swapAction);
 
