@@ -22,7 +22,6 @@ export interface WalletInterface {
     outputAsset: string
   ): string;
   sign(psbtBase64: string): string;
-  toHex(psbtBase64: string): string;
 }
 
 export default class Wallet implements WalletInterface {
@@ -136,17 +135,6 @@ export default class Wallet implements WalletInterface {
 
     return psbt.toBase64();
   }
-
-  toHex(psbtBase64: string): string {
-    let psbt : Psbt;
-    try {
-      psbt = Psbt.fromBase64(psbtBase64);
-    } catch (ignore) {
-      throw (new Error('Invalid psbt'));
-    }
-  
-    return psbt.extractTransaction().toHex();
-  }
   
 }
 
@@ -171,6 +159,20 @@ export function createTx(): string {
   let psbt = new Psbt();
 
   return psbt.toBase64()
+}
+
+export function toHex(psbtBase64: string): string {
+  let psbt : Psbt;
+  try {
+    psbt = Psbt.fromBase64(psbtBase64);
+  } catch (ignore) {
+    throw (new Error('Invalid psbt'));
+  }
+  
+  psbt.validateSignaturesOfAllInputs();
+  psbt.finalizeAllInputs();
+
+  return psbt.extractTransaction().toHex();
 }
 
 export async function fetchUtxos(address: string, url: string): Promise<any> {

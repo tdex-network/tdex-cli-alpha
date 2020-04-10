@@ -1,6 +1,6 @@
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { WalletInterface, fromWIF } from '../wallet';
+import { WalletInterface, fromWIF, toHex } from '../wallet';
 import { decrypt } from '../crypto';
 import { makeid } from '../helpers';
 const state = new State();
@@ -67,6 +67,6 @@ export default function (message: string, cmdObj:any): void {
 
     success(`\nSwapComplete message\n\n${JSON.stringify(TradeCompleteRequest.SwapComplete)}`);
     if (cmdObj.push)
-      log(walletInstance.toHex(signedPsbt));
+      log(`\nSigned transaction (hex format)\n\n${toHex(signedPsbt)}`);
   }).catch(error)
 }

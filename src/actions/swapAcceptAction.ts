@@ -1,8 +1,10 @@
+import axios from 'axios';
+
 import { info, log, error, success } from '../logger';
 import State from '../state';
 import { WalletInterface, fromWIF, fetchUtxos } from '../wallet';
 import { decrypt } from '../crypto';
-import { makeid } from '../helpers';
+import { makeid, TAXI_API_URL } from '../helpers';
 const state = new State();
 
 const { Confirm, Password } = require('enquirer');
@@ -70,8 +72,17 @@ export default function (message: string): void {
       json.asset_p
     );
 
+    const body = { psbt: unsignedPsbt };
+    const options = { headers: { "Content-Type": "application/json", "Api-Key": "VULPEM_FREE" } };
+    
+    return axios.post(`${TAXI_API_URL[network.chain]}/topup`, body, options)
+  }).then((taxiResponse: any) => {
+
+    const psbtWithFees = taxiResponse.data.data.signedTx;
+
     log("\nSigning with private key...");
-    return walletInstance.sign(unsignedPsbt);
+
+    return walletInstance.sign(psbtWithFees);
   }).then((signedPsbt: string) => {
     success("\n√ Done\n");
 

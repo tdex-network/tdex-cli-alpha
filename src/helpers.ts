@@ -6,6 +6,11 @@ export const NETWORKS = {
   "regtest": "https://nigiri.network/liquid/api"
 }
 
+export const TAXI_API_URL = {
+  "liquid": "https://liquid-taxi.herokuapp.com",
+  "regtest": "https://liquid-taxi.herokuapp.com"
+}
+
 export function makeid(length:number): string {
   let result           = '';
   const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
