@@ -75,7 +75,7 @@ export default function (message: string): void {
     const body = { psbt: unsignedPsbt };
     const options = { headers: { "Content-Type": "application/json", "Api-Key": "VULPEM_FREE" } };
     
-    return axios.post(`${TAXI_API_URL[network.chain]}/topup`, body, options)
+    return axios.post(`${(TAXI_API_URL as any)[network.chain]}/topup`, body, options)
   }).then((taxiResponse: any) => {
 
     const psbtWithFees = taxiResponse.data.data.signedTx;
