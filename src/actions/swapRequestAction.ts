@@ -1,10 +1,9 @@
-import * as fs from 'fs';
 import * as PathModule from 'path';
 import { Swap, WatchOnlyWallet, fetchUtxos, networks } from 'tdex-sdk';
 
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { fromSatoshi, toSatoshi, datadir } from '../helpers';
+import { fromSatoshi, toSatoshi, datadir, writeBinary } from '../helpers';
 
 const state = new State();
 //eslint-disable-next-line
@@ -132,9 +131,7 @@ export default function (cmdObj: any): void {
           `${JSON.parse(json).id}.bin`
         );
         const file = cmdObj.output ? cmdObj.output : defaultPath;
-        const stream = fs.createWriteStream(file);
-        stream.write(swapRequest);
-        stream.end();
+        writeBinary(file, swapRequest);
         success(`SwapRequest message saved into ${file}`);
       }
     })
