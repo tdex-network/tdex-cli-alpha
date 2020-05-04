@@ -21,6 +21,7 @@ import {
   swapAction,
   swapAcceptAction,
   swapCompleteAction,
+  tradeAction,
 } from './actions';
 import {
   operatorConnectAction,
@@ -58,6 +59,14 @@ program
   .command('connect <endpoint>')
   .description('Select the liquidity provider')
   .action(connectAction);
+
+/**
+ * Trade
+ */
+program
+  .command('trade')
+  .description('Make a trade proposal')
+  .action(tradeAction);
 
 /**
  * Market

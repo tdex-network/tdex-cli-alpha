@@ -12,6 +12,8 @@ import swapAction from './swapAction';
 import swapAcceptAction from './swapAcceptAction';
 import swapCompleteAction from './swapCompleteAction';
 
+import tradeAction from './tradeAction';
+
 export {
   connectAction,
   infoAction,
@@ -24,4 +26,5 @@ export {
   swapAction,
   swapAcceptAction,
   swapCompleteAction,
+  tradeAction,
 };
