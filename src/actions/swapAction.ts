@@ -42,11 +42,13 @@ export default function (cmdObj: any) {
   };
   const trade = new Trade(init);
 
-  const [tickerA, tickerB] = Object.keys(market.tickers);
+  const baseAssetTicker = market.tickers[market.assets.baseAsset];
+  const quoteAssetTicker = market.tickers[market.assets.quoteAsset];
+
   const toggle = new Toggle({
-    message: 'Which asset do you want to send?',
-    enabled: tickerA,
-    disabled: tickerB,
+    message: `Do you want to buy or sell ${baseAssetTicker}?`,
+    enabled: 'BUY',
+    disabled: 'SELL',
   });
   const amount = (message: string) =>
     new NumberPrompt({
@@ -71,17 +73,14 @@ export default function (cmdObj: any) {
 
   toggle
     .run()
-    .then((isTickerA: boolean) => {
-      if (isTickerA) {
-        toBeSent = tickerA;
-        toReceive = tickerB;
+    .then((isBuyType: boolean) => {
+      if (isBuyType) {
+        toBeSent = quoteAssetTicker;
+        toReceive = baseAssetTicker;
       } else {
-        toBeSent = tickerB;
-        toReceive = tickerA;
+        toBeSent = baseAssetTicker;
+        toReceive = quoteAssetTicker;
       }
-
-      const isBuyType: boolean =
-        market.assets.baseAsset.substring(0, 4) === toReceive;
 
       if (isBuyType) {
         throw new Error('Buy type not supported yet');

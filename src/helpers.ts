@@ -57,8 +57,8 @@ export async function tickersFromMarkets(
     const quoteAssetTicker = ticker || quoteAsset.substring(0, previewLength);
     const pair = `${baseAssetTicker}-${quoteAssetTicker}`;
     marketsByTicker[pair] = {
-      [baseAssetTicker]: baseAsset,
-      [quoteAssetTicker]: quoteAsset,
+      [baseAsset]: baseAssetTicker,
+      [quoteAsset]: quoteAssetTicker,
     };
   }
   return marketsByTicker;
