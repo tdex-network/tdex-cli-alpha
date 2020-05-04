@@ -1,14 +1,12 @@
-import { Trade, TradeType, Swap } from 'tdex-sdk';
+import { Swap, WatchOnlyWallet, fetchUtxos, networks } from 'tdex-sdk';
 import { info, log, error, success } from '../logger';
 
 import State from '../state';
-import { decrypt } from '../crypto';
 import { fromSatoshi, toSatoshi } from '../helpers';
-import { createTx } from '../wallet';
 
 const state = new State();
 //eslint-disable-next-line
-const { Toggle, NumberPrompt, Confirm, Password } = require('enquirer');
+const { Toggle, NumberPrompt, Confirm } = require('enquirer');
 
 // 1. Fetch utxos
 // 2. CHeck if input amount is enough
@@ -17,17 +15,12 @@ const { Toggle, NumberPrompt, Confirm, Password } = require('enquirer');
 // 5. Sign the final psbt
 // 6. Send SwapComplete back
 
-export default function (cmdObj: any) {
+export default function (): void {
   info('=========*** Swap ***==========\n');
 
-  const { wallet, provider, market, network } = state.get();
+  const { wallet, market, network } = state.get();
 
   if (!network.selected) return error('Select a valid network first');
-
-  if (!cmdObj.local && !provider.selected)
-    return error(
-      'A provider is required. Select one with connect <endpoint> command'
-    );
 
   if (!market.selected)
     return error('A market is required. Select one with market <pair> command');
@@ -35,18 +28,10 @@ export default function (cmdObj: any) {
   if (!wallet.selected)
     return error('A wallet is required. Create or restore with wallet command');
 
-  const init = {
-    chain: network.chain,
-    providerUrl: provider.endpoint,
-    explorerUrl: network.explorer,
-  };
-  const trade = new Trade(init);
-
-  const baseAssetTicker = market.tickers[market.assets.baseAsset];
-  const quoteAssetTicker = market.tickers[market.assets.quoteAsset];
-
   const toggle = new Toggle({
-    message: `Do you want to buy or sell ${baseAssetTicker}?`,
+    message: `Do you want to buy or sell ${
+      market.tickers[market.assets.baseAsset]
+    }?`,
     enabled: 'BUY',
     disabled: 'SELL',
   });
@@ -59,27 +44,22 @@ export default function (cmdObj: any) {
     name: 'question',
     message: 'Are you sure continue?',
   });
-  const password = new Password({
-    type: 'password',
-    name: 'key',
-    message: 'Type your password',
-  });
 
   let toBeSent: string,
     toReceive: string,
     amountToBeSent: number,
-    amountToReceive: number,
-    previewInSatoshis: any;
+    amountToReceive: number;
 
   toggle
     .run()
     .then((isBuyType: boolean) => {
+      const { baseAsset, quoteAsset } = market.assets;
       if (isBuyType) {
-        toBeSent = quoteAssetTicker;
-        toReceive = baseAssetTicker;
+        toBeSent = quoteAsset;
+        toReceive = baseAsset;
       } else {
-        toBeSent = baseAssetTicker;
-        toReceive = quoteAssetTicker;
+        toBeSent = baseAsset;
+        toReceive = quoteAsset;
       }
 
       if (isBuyType) {
@@ -90,85 +70,56 @@ export default function (cmdObj: any) {
     })
     .then((inputAmount: number) => {
       amountToBeSent = inputAmount;
-
-      const execute = cmdObj.local
-        ? () => amount(`How much do you want to receive?`).run()
-        : () => Promise.resolve();
-
-      return execute();
+      return amount(`How much do you want to receive?`).run();
     })
-    .then((outputAmountOrNothing: number) => {
-      // Fetch market rate from daemon and calulcate prices for each ticker
-      const isBuyType = market.assets.baseAsset.includes(toReceive);
-      const tradeType = isBuyType ? TradeType.BUY : TradeType.SELL;
-
-      amountToReceive = cmdObj.local && outputAmountOrNothing;
-
-      const execute = cmdObj.local
-        ? () => Promise.resolve()
-        : () =>
-            trade.preview(market.assets, tradeType, toSatoshi(amountToBeSent));
-
-      return execute();
+    .then((outputAmount: number) => {
+      amountToReceive = toSatoshi(outputAmount);
+      return Promise.resolve();
     })
-    .then((previewOrNothing: any) => {
-      previewInSatoshis = previewOrNothing;
-
+    .then(() => {
       log(
-        `Gotcha! You will send ${toBeSent} ${amountToBeSent} and receive ${toReceive} ${fromSatoshi(
-          previewInSatoshis.amountToReceive
-        )}`
+        `Gotcha! You will send ${
+          market.tickers[toBeSent]
+        } ${amountToBeSent} and receive ${
+          market.tickers[toReceive]
+        } ${fromSatoshi(amountToReceive)}`
       );
 
       return confirm.run();
     })
     .then((keepGoing: boolean) => {
       if (!keepGoing) throw 'Canceled';
-
-      if (cmdObj.local) {
-        const swap = new Swap();
-        const psbtBase64 = createTx();
-        const swapRequest = swap.request({
-          assetToBeSent: toBeSent,
-          amountToBeSent: toSatoshi(amountToBeSent),
-          assetToReceive: toReceive,
-          amountToReceive: toSatoshi(amountToReceive),
-          psbtBase64,
-        });
-        const json = Swap.parse({
-          message: swapRequest,
-          type: 'SwapRequest',
-        });
-        return success(`\nSwapRequest message\n\n${json}`);
-      }
-
-      const execute =
-        wallet.keystore.type === 'encrypted'
-          ? () => password.run()
-          : () => Promise.resolve(wallet.keystore.value);
-
-      return execute();
+      return fetchUtxos(wallet.address, network.explorer);
     })
-    .then((passwordOrWif: string) => {
-      const wif =
-        wallet.keystore.type === 'encrypted'
-          ? decrypt(wallet.keystore.value, passwordOrWif)
-          : passwordOrWif;
+    .then((utxos: any[]) => {
+      const woWallet = new WatchOnlyWallet({
+        address: wallet.address,
+        network: (networks as any)[network.chain],
+      });
+      const emptyPsbt = WatchOnlyWallet.createTx();
+      const psbtBase64 = woWallet.updateTx(
+        emptyPsbt,
+        utxos,
+        toSatoshi(amountToBeSent),
+        amountToReceive,
+        toBeSent,
+        toReceive
+      );
 
-      log(`\nSending Trade proposal to provider...`);
-      log('Signing with private key...');
+      const swap = new Swap();
+      const swapRequest = swap.request({
+        assetToBeSent: toBeSent,
+        amountToBeSent: toSatoshi(amountToBeSent),
+        assetToReceive: toReceive,
+        amountToReceive: amountToReceive,
+        psbtBase64,
+      });
 
-      const params = {
-        market: market.assets,
-        amount: previewInSatoshis.amountToBeSent,
-        privateKey: wif,
-      };
-
-      return trade.sell(params);
-    })
-    .then((txid: string) => {
-      success('Trade completed!\n');
-      info(`tx hash ${txid}`);
+      const json = Swap.parse({
+        message: swapRequest,
+        type: 'SwapRequest',
+      });
+      return success(`\nSwapRequest message\n\n${json}`);
     })
     .catch(error);
 }
