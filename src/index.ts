@@ -24,7 +24,7 @@ import {
 } from './actions';
 import {
   operatorConnectAction,
-  operatorDepositAction
+  operatorDepositAction,
 } from './operatorActions';
 import { NETWORKS } from './helpers';
 //eslint-disable-next-line
@@ -116,7 +116,6 @@ swap
   .option('-p, --push', 'Extract hex string and broadcast to the chain')
   .description('Parse and complete a given SwapAccept message')
   .action(swapCompleteAction);
-
 
 /**
  * operator

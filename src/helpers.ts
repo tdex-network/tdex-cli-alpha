@@ -106,7 +106,7 @@ export function mergeDeep(...objects) {
 }
 
 export class OperatorClient {
-  client: services.OperatorClient 
+  client: services.OperatorClient;
   constructor(endpoint) {
     this.client = new services.OperatorClient(
       endpoint,
@@ -118,13 +118,10 @@ export class OperatorClient {
     return new Promise((resolve, reject) => {
       const deadline = new Date();
       deadline.setSeconds(deadline.getSeconds() + 3);
-      this.client.waitForReady(
-        deadline,
-        (err) => {
-          if (err) return reject(err);
-          resolve();
-        }
-      );
+      this.client.waitForReady(deadline, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
     });
   }
 
@@ -164,4 +161,3 @@ export class OperatorClient {
     });
   }
 }
-

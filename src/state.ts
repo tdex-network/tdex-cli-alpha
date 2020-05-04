@@ -73,8 +73,8 @@ const initialState = {
     selected: false,
     endpoint: '',
     fees: [],
-    markets: [] 
-  }
+    markets: [],
+  },
 };
 
 export default class State implements StateInterface {

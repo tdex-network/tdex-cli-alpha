@@ -10,21 +10,24 @@ export default function (cmdObj: any): void {
 
   const { operator } = state.get();
 
-  if (!operator.selected) return error('Select a valid operator gRPC interface');
+  if (!operator.selected)
+    return error('Select a valid operator gRPC interface');
 
   const grpc = new OperatorClient(operator.endpoint);
 
   if (cmdObj.fee) {
-    grpc.feeDepositAddress()
+    grpc
+      .feeDepositAddress()
       .then((address: string) => {
         return log(`[Fee] wallet address: ${address}`);
       })
       .catch(error);
   } else {
-    grpc.depositAddress()
-    .then((address: string) => {
-      return log(`[Market] wallet address: ${address}`);
-    })
-    .catch(error);
+    grpc
+      .depositAddress()
+      .then((address: string) => {
+        return log(`[Market] wallet address: ${address}`);
+      })
+      .catch(error);
   }
 }

@@ -13,12 +13,13 @@ export default function (endpoint: string): void {
 
   const grpc = new OperatorClient(endpoint);
 
-  grpc.waitForReady()
+  grpc
+    .waitForReady()
     .then(() => {
       state.set({
         operator: {
           selected: true,
-          endpoint
+          endpoint,
         },
       });
 
