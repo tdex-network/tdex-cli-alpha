@@ -1,8 +1,10 @@
+import * as fs from 'fs';
+import * as PathModule from 'path';
 import { Swap, WatchOnlyWallet, fetchUtxos, networks } from 'tdex-sdk';
-import { info, log, error, success } from '../logger';
 
+import { info, log, error, success } from '../logger';
 import State from '../state';
-import { fromSatoshi, toSatoshi } from '../helpers';
+import { fromSatoshi, toSatoshi, datadir } from '../helpers';
 
 const state = new State();
 //eslint-disable-next-line
@@ -15,10 +17,13 @@ const { Toggle, NumberPrompt, Confirm } = require('enquirer');
 // 5. Sign the final psbt
 // 6. Send SwapComplete back
 
-export default function (): void {
+export default function (cmdObj: any): void {
   info('=========*** Swap ***==========\n');
 
   const { wallet, market, network } = state.get();
+
+  if (cmdObj.output && !PathModule.isAbsolute(cmdObj.output))
+    return error('Path must be asbolute if specified');
 
   if (!network.selected) return error('Select a valid network first');
 
@@ -119,7 +124,19 @@ export default function (): void {
         message: swapRequest,
         type: 'SwapRequest',
       });
-      return success(`\nSwapRequest message\n\n${json}`);
+      if (cmdObj.print) {
+        success(`\nSwapRequest message\n\n${json}`);
+      } else {
+        const defaultPath = PathModule.resolve(
+          datadir(),
+          `${JSON.parse(json).id}.bin`
+        );
+        const file = cmdObj.output ? cmdObj.output : defaultPath;
+        const stream = fs.createWriteStream(file);
+        stream.write(swapRequest);
+        stream.end();
+        success(`SwapRequest message saved into ${file}`);
+      }
     })
     .catch(error);
 }
