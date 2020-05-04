@@ -9,14 +9,19 @@ const state = new State();
 export default function (endpoint: string): void {
   info('=========*** Provider ***==========\n');
 
+  const { network } = state.get();
+
   if (!isValidUrl(endpoint))
     return error('The provided endpoint URL is not valid');
 
   const client = new TraderClient(endpoint);
   client
     .markets()
-    .then((markets) => {
-      const marketsByTicker = tickersFromMarkets(markets);
+    .then(async (markets) => {
+      const marketsByTicker = await tickersFromMarkets(
+        markets,
+        network.explorer
+      );
       const pairs = Object.keys(marketsByTicker);
 
       state.set({

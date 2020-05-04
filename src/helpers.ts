@@ -1,4 +1,5 @@
 // @ts-nocheck
+import axios from 'axios';
 import { URL } from 'url';
 
 export const NETWORKS = {
@@ -26,18 +27,36 @@ export function fromSatoshi(x: number): number {
   );
 }
 
-export function tickersFromMarkets(markets: Array<any>): any {
+export async function tickersFromMarkets(
+  markets: Array<any>,
+  url: string
+): Promise<any> {
   const marketsByTicker: any = {};
-  markets.forEach(({ baseAsset, quoteAsset }) => {
+  const fetchTicker = async (asset: string, url: string): Promise<any> => {
+    try {
+      const res = await axios.get(`${url}/asset/${asset}`);
+      return res.data.ticker;
+    } catch (ignore) {
+      return undefined;
+    }
+  };
+  let baseAssetTicker: string;
+
+  for (let i = 0; i < markets.length; ++i) {
+    const { baseAsset, quoteAsset } = markets[i];
     const previewLength = 4;
-    const basePrefix = baseAsset.substring(0, previewLength);
-    const quotePrefix = quoteAsset.substring(0, previewLength);
-    const ticker = `${basePrefix}-${quotePrefix}`;
-    marketsByTicker[ticker] = {
-      [basePrefix]: baseAsset,
-      [quotePrefix]: quoteAsset,
+    if (!baseAssetTicker) {
+      const ticker = await fetchTicker(baseAsset, url);
+      baseAssetTicker = ticker || baseAsset.substring(0, previewLength);
+    }
+    const ticker = await fetchTicker(quoteAsset, url);
+    const quoteAssetTicker = ticker || quoteAsset.substring(0, previewLength);
+    const pair = `${baseAssetTicker}-${quoteAssetTicker}`;
+    marketsByTicker[pair] = {
+      [baseAssetTicker]: baseAsset,
+      [quoteAssetTicker]: quoteAsset,
     };
-  });
+  }
   return marketsByTicker;
 }
 
