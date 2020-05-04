@@ -10,10 +10,7 @@ export default function (): void {
 
   const { provider, market, network } = state.get();
 
-  if (!network)
-    return error(
-      'A network is required. Select one with network <name> command'
-    );
+  if (!network.selected) return error('Select a valid network');
 
   if (!provider.selected)
     return error(
