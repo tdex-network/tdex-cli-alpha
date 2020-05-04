@@ -23,11 +23,8 @@ export default function (): void {
   const client = new TraderClient(provider.endpoint);
   client
     .markets()
-    .then(async (markets) => {
-      const marketsByTicker = await tickersFromMarkets(
-        markets,
-        network.explorer
-      );
+    .then((markets) => tickersFromMarkets(markets, network.explorer))
+    .then((marketsByTicker) => {
       const pairs = Object.keys(marketsByTicker);
 
       state.set({
