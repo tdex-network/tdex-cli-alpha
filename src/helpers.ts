@@ -5,6 +5,8 @@ import * as grpc from 'grpc';
 
 import * as services from 'tdex-protobuf/js/operator_grpc_pb';
 import * as messages from 'tdex-protobuf/js/operator_pb';
+import * as os from 'os';
+import * as PathModule from 'path';
 
 export const NETWORKS = {
   liquid: 'https://blockstream.info/liquid/api',
@@ -160,4 +162,8 @@ export class OperatorClient {
       );
     });
   }
+}
+
+export function datadir(): string {
+  return process.env.TDEX_CLIPATH || PathModule.resolve(os.homedir(), '.tdex');
 }
