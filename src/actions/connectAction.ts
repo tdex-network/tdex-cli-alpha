@@ -11,6 +11,11 @@ export default function (endpoint: string): void {
 
   const { network } = state.get();
 
+  if (!network)
+    return error(
+      'A network is required. Select one with network <name> command'
+    );
+
   if (!isValidUrl(endpoint))
     return error('The provided endpoint URL is not valid');
 
