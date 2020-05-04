@@ -3988,7 +3988,7 @@ tar@^4.4.2:
 
 tdex-protobuf@sevenlab/tdex-protobuf:
   version "1.0.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#1fb25d18186a9071d0fd7cd7aa3817af357ebd73"
+  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#6bc63d868f7821cd606bb35bbe90512365406240"
 
 tdex-sdk@sevenlab/tdex-sdk:
   version "0.1.0"

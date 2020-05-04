@@ -1,6 +1,10 @@
 // @ts-nocheck
 import axios from 'axios';
 import { URL } from 'url';
+import * as grpc from 'grpc';
+
+import * as services from 'tdex-protobuf/js/operator_grpc_pb';
+import * as messages from 'tdex-protobuf/js/operator_pb';
 
 export const NETWORKS = {
   liquid: 'https://blockstream.info/liquid/api',
@@ -100,3 +104,52 @@ export function mergeDeep(...objects) {
     return prev;
   }, {});
 }
+
+export class GrpcClient {
+  client: services.OperatorClient 
+  constructor(endpoint) {
+    this.client = new services.OperatorClient(
+      endpoint,
+      grpc.credentials.createInsecure()
+    );
+  }
+
+  feeDepositAddress(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.client.feeDepositAddress(
+        new messages.FeeDepositAddressRequest(),
+        (err, response) => {
+          if (err) return reject(err);
+          resolve(response!.getAddress());
+        }
+      );
+    });
+  }
+
+  depositAddress(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.client.depositAddress(
+        new messages.DepositAddressRequest(),
+        (err, response) => {
+          if (err) return reject(err);
+          resolve(response!.getAddress());
+        }
+      );
+    });
+  }
+
+  feeBalance(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.client.feeBalance(
+        new messages.FeeBalanceRequest(),
+        (err, response) => {
+          if (err) return reject(err);
+          resolve(response!.getBalance());
+        }
+      );
+    });
+  }
+
+
+}
+

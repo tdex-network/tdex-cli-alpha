@@ -32,6 +32,7 @@
     "enquirer": "^2.3.4",
     "google-protobuf": "^3.11.4",
     "liquidjs-lib": "vulpemventures/liquidjs-lib",
+    "tdex-protobuf": "sevenlab/tdex-protobuf",
     "tdex-sdk": "sevenlab/tdex-sdk"
   },
   "devDependencies": {
