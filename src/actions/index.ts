@@ -8,7 +8,7 @@ import marketPriceAction from './marketPriceAction';
 import walletAction from './walletAction';
 import walletBalanceAction from './walletBalanceAction';
 
-import swapAction from './swapAction';
+import swapRequestAction from './swapRequestAction';
 import swapAcceptAction from './swapAcceptAction';
 import swapCompleteAction from './swapCompleteAction';
 
@@ -23,7 +23,7 @@ export {
   marketListAction,
   walletAction,
   walletBalanceAction,
-  swapAction,
+  swapRequestAction,
   swapAcceptAction,
   swapCompleteAction,
   tradeAction,

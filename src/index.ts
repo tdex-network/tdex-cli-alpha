@@ -18,7 +18,7 @@ import {
   connectAction,
   marketPriceAction,
   walletBalanceAction,
-  swapAction,
+  swapRequestAction,
   swapAcceptAction,
   swapCompleteAction,
   tradeAction,
@@ -104,16 +104,17 @@ wallet
 /**
  * swap
  */
-const swap = program
-  .command('swap')
-  .option('-v, --verbose', 'Show verbose information', false)
+const swap = program.command('swap');
+
+swap
+  .command('request')
+  .option('-p, --print', 'Print to stdout', false)
   .option(
-    '-l, --local',
-    'Print the SwapRequest message without sending to the provider',
-    false
+    '-o, --output <path/to/file>',
+    'Set a diffent path where to save the file'
   )
   .description('Make a swap proposal')
-  .action(swapAction);
+  .action(swapRequestAction);
 
 swap
   .command('accept <message>')
