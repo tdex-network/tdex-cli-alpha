@@ -1,7 +1,6 @@
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { networks } from 'liquidjs-lib';
-import { fetchBalances } from '../wallet';
+import { networks, fetchBalances } from 'tdex-sdk';
 const state = new State();
 
 export default function (): void {

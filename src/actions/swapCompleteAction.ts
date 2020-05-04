@@ -1,6 +1,6 @@
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { WalletInterface, fromWIF, toHex } from '../wallet';
+import { Wallet, WalletInterface } from 'tdex-sdk';
 import { decrypt } from '../crypto';
 import { makeid } from '../helpers';
 const state = new State();
@@ -55,7 +55,7 @@ export default function (message: string, cmdObj: any): void {
           ? decrypt(wallet.keystore.value, passwordOrWif)
           : passwordOrWif;
 
-      walletInstance = fromWIF(wif, network.chain);
+      walletInstance = Wallet.fromWIF(wif, network.chain);
 
       log('\nSigning with private key...');
       return walletInstance.sign(psbtBase64);
@@ -77,7 +77,7 @@ export default function (message: string, cmdObj: any): void {
         )}`
       );
       if (cmdObj.push)
-        log(`\nSigned transaction (hex format)\n\n${toHex(signedPsbt)}`);
+        log(`\nSigned transaction (hex format)\n\n${Wallet.toHex(signedPsbt)}`);
     })
     .catch(error);
 }

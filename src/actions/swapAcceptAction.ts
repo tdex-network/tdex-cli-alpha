@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { WalletInterface, fromWIF, fetchUtxos } from '../wallet';
+import { Wallet, WalletInterface, fetchUtxos } from 'tdex-sdk';
 import { decrypt } from '../crypto';
 import { makeid, TAXI_API_URL } from '../helpers';
 const state = new State();
@@ -62,7 +62,7 @@ export default function (message: string): void {
           ? decrypt(wallet.keystore.value, passwordOrWif)
           : passwordOrWif;
 
-      walletInstance = fromWIF(wif, network.chain);
+      walletInstance = Wallet.fromWIF(wif, network.chain);
 
       return fetchUtxos(walletInstance.address, network.explorer);
     })

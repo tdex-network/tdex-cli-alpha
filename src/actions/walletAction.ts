@@ -1,5 +1,5 @@
 import { info, log, error } from '../logger';
-import Wallet, { WalletInterface, fromWIF } from '../wallet';
+import { Wallet, WalletInterface } from 'tdex-sdk';
 import { encrypt } from '../crypto';
 //eslint-disable-next-line
 const enquirer = require('enquirer');
@@ -69,9 +69,9 @@ export default function (): void {
 
   restore.run().then((restoreFromWif: boolean) => {
     if (!restoreFromWif) {
-      const walletFromScratch: WalletInterface = new Wallet({
-        network: network.chain,
-      });
+      const walletFromScratch: WalletInterface = Wallet.fromRandom(
+        network.chain
+      );
       type.run().then((storageType: string) => {
         if (storageType === 'encrypted')
           password
@@ -93,7 +93,10 @@ export default function (): void {
       });
     } else {
       privatekey.run().then((wif: string) => {
-        const restoredWallet: WalletInterface = fromWIF(wif, network.chain);
+        const restoredWallet: WalletInterface = Wallet.fromWIF(
+          wif,
+          network.chain
+        );
 
         type.run().then((storageType: string) => {
           if (storageType === 'encrypted')
