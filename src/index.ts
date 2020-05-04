@@ -22,6 +22,9 @@ import {
   swapAcceptAction,
   swapCompleteAction,
 } from './actions';
+import {
+  operatorConnectAction
+} from './operatorActions';
 import { NETWORKS } from './helpers';
 //eslint-disable-next-line
 const pkg = require('../package.json');
@@ -112,5 +115,25 @@ swap
   .option('-p, --push', 'Extract hex string and broadcast to the chain')
   .description('Parse and complete a given SwapAccept message')
   .action(swapCompleteAction);
+
+
+/**
+ * operator
+ */
+const operator = program
+  .command('operator')
+  .description('Interact with operator gRPC interface of the tdex-daemon');
+
+operator
+  .command('connect <endpoint>')
+  .description('Select gRPC interface of the tdex-daemon')
+  .action(operatorConnectAction);
+
+/* operator
+    .command('deposit')
+    .option('-f, --fee', 'Get the fee account address')
+    .description('Get the deposit address for creating a new market')
+    .action(operatorDeposit)
+ */
 
 program.parse(process.argv);

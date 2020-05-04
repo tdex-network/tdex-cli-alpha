@@ -105,13 +105,27 @@ export function mergeDeep(...objects) {
   }, {});
 }
 
-export class GrpcClient {
+export class OperatorClient {
   client: services.OperatorClient 
   constructor(endpoint) {
     this.client = new services.OperatorClient(
       endpoint,
       grpc.credentials.createInsecure()
     );
+  }
+
+  waitForReady(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const deadline = new Date();
+      deadline.setSeconds(deadline.getSeconds() + 3);
+      this.client.waitForReady(
+        deadline,
+        (err) => {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
   }
 
   feeDepositAddress(): Promise<any> {
@@ -149,7 +163,5 @@ export class GrpcClient {
       );
     });
   }
-
-
 }
 

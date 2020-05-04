@@ -16,6 +16,7 @@ export interface StateObjectInterface {
   provider: StateProviderInterface;
   market: StateMarketInterface;
   wallet: any;
+  operator: any;
 }
 
 export interface StateProviderInterface {
@@ -68,6 +69,12 @@ const initialState = {
       value: '',
     },
   },
+  operator: {
+    selected: false,
+    endpoint: '',
+    fees: [],
+    markets: [] 
+  }
 };
 
 export default class State implements StateInterface {
