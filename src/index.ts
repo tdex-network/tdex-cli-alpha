@@ -23,7 +23,8 @@ import {
   swapCompleteAction,
 } from './actions';
 import {
-  operatorConnectAction
+  operatorConnectAction,
+  operatorDepositAction
 } from './operatorActions';
 import { NETWORKS } from './helpers';
 //eslint-disable-next-line
@@ -129,11 +130,10 @@ operator
   .description('Select gRPC interface of the tdex-daemon')
   .action(operatorConnectAction);
 
-/* operator
-    .command('deposit')
-    .option('-f, --fee', 'Get the fee account address')
-    .description('Get the deposit address for creating a new market')
-    .action(operatorDeposit)
- */
+operator
+  .command('deposit')
+  .option('-f, --fee', 'Get the fee account address')
+  .description('Get the deposit address for creating a new market')
+  .action(operatorDepositAction);
 
 program.parse(process.argv);

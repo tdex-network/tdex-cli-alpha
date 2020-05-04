@@ -6,7 +6,7 @@ import State from '../state';
 const state = new State();
 
 export default function (endpoint: string): void {
-  info('=========*** Provider ***==========\n');
+  info('=========*** Operator ***==========\n');
 
   if (!isValidUrl(endpoint))
     return error('The provided endpoint URL is not valid');

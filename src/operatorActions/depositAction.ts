@@ -1,37 +1,30 @@
 // Helpers
 import { info, log, error } from '../logger';
-import { isValidUrl, tickersFromMarkets, GrpcClient } from '../helpers';
+import { OperatorClient } from '../helpers';
 // State
 import State from '../state';
 const state = new State();
 
-export default function (endpoint: string): void {
-  info('=========*** Provider ***==========\n');
+export default function (cmdObj: any): void {
+  info('=========*** Operator ***==========\n');
 
-  const { network } = state.get();
+  const { operator } = state.get();
 
-  if (!network.selected) return error('Select a valid network');
+  if (!operator.selected) return error('Select a valid operator gRPC interface');
 
-  if (!isValidUrl(endpoint))
-    return error('The provided endpoint URL is not valid');
+  const grpc = new OperatorClient(operator.endpoint);
 
-  const client = new TraderClient(endpoint);
-  client
-    .markets()
-    .then((markets) => tickersFromMarkets(markets, network.explorer))
-    .then((marketsByTicker) => {
-      const pairs = Object.keys(marketsByTicker);
-
-      state.set({
-        provider: {
-          endpoint,
-          pairs,
-          markets: marketsByTicker,
-          selected: true,
-        },
-      });
-
-      return log(`Current provider endpoint: ${endpoint}`);
+  if (cmdObj.fee) {
+    grpc.feeDepositAddress()
+      .then((address: string) => {
+        return log(`[Fee] wallet address: ${address}`);
+      })
+      .catch(error);
+  } else {
+    grpc.depositAddress()
+    .then((address: string) => {
+      return log(`[Market] wallet address: ${address}`);
     })
     .catch(error);
+  }
 }

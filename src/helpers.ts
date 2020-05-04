@@ -128,7 +128,7 @@ export class OperatorClient {
     });
   }
 
-  feeDepositAddress(): Promise<any> {
+  feeDepositAddress(): Promise<string> {
     return new Promise((resolve, reject) => {
       this.client.feeDepositAddress(
         new messages.FeeDepositAddressRequest(),
@@ -140,7 +140,7 @@ export class OperatorClient {
     });
   }
 
-  depositAddress(): Promise<any> {
+  depositAddress(): Promise<string> {
     return new Promise((resolve, reject) => {
       this.client.depositAddress(
         new messages.DepositAddressRequest(),
