@@ -1,4 +1,6 @@
-##STate
+# Bin files
+*.bin
+##State
 state.json
 dist
 .DS_Store
