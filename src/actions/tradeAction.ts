@@ -67,11 +67,12 @@ export default function () {
     toReceive: string,
     amountToBeSent: number,
     amountToReceive: number,
-    previewInSatoshis: any;
+    isBuyType: boolean;
 
   toggle
     .run()
-    .then((isBuyType: boolean) => {
+    .then((_isBuyType: boolean) => {
+      isBuyType = _isBuyType;
       const { baseAsset, quoteAsset } = market.assets;
       if (isBuyType) {
         toBeSent = quoteAsset;
@@ -81,33 +82,38 @@ export default function () {
         toReceive = quoteAsset;
       }
 
-      if (isBuyType) {
-        throw new Error('Buy type not supported yet');
-      }
-
-      return amount(`How much do you want to send?`).run();
+      return amount(
+        `How much do you want to ${isBuyType ? 'buy' : 'send'}?`
+      ).run();
     })
     .then((inputAmount: number) => {
-      amountToBeSent = inputAmount;
+      if (isBuyType) {
+        amountToReceive = toSatoshi(inputAmount);
+      } else {
+        amountToBeSent = toSatoshi(inputAmount);
+      }
       return Promise.resolve();
     })
     .then(() => {
       // Fetch market rate from daemon and calulcate prices for each ticker
-      const isBuyType = market.assets.baseAsset.includes(toReceive);
       const tradeType = isBuyType ? TradeType.BUY : TradeType.SELL;
+      const amount = isBuyType ? amountToReceive : amountToBeSent;
 
-      return trade.preview(market.assets, tradeType, toSatoshi(amountToBeSent));
+      return trade.preview(market.assets, tradeType, amount);
     })
     .then((preview: any) => {
-      previewInSatoshis = preview;
-      amountToReceive = preview.amountToReceive;
+      if (isBuyType) {
+        amountToBeSent = preview.amountToBeSent;
+      } else {
+        amountToReceive = preview.amountToReceive;
+      }
 
       log(
-        `Gotcha! You will send ${
-          market.tickers[toBeSent]
-        } ${amountToBeSent} and receive ${
-          market.tickers[toReceive]
-        } ${fromSatoshi(amountToReceive)}`
+        `Gotcha! You will send ${market.tickers[toBeSent]} ${fromSatoshi(
+          amountToBeSent
+        )} and receive ${market.tickers[toReceive]} ${fromSatoshi(
+          amountToReceive
+        )}`
       );
 
       return confirm.run();
@@ -133,11 +139,14 @@ export default function () {
 
       const params = {
         market: market.assets,
-        amount: previewInSatoshis.amountToBeSent,
+        amount: isBuyType ? amountToReceive : amountToBeSent,
         privateKey: wif,
       };
 
-      return trade.sell(params);
+      const execute = isBuyType
+        ? () => trade.buy(params)
+        : () => trade.sell(params);
+      return execute();
     })
     .then((txid: string) => {
       success('Trade completed!\n');
