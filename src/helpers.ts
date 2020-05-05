@@ -8,7 +8,6 @@ import * as messages from 'tdex-protobuf/js/operator_pb';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as PathModule from 'path';
-import { Swap } from 'tdex-sdk';
 
 export const NETWORKS = {
   liquid: 'https://blockstream.info/liquid/api',
@@ -66,17 +65,6 @@ export async function tickersFromMarkets(
     };
   }
   return marketsByTicker;
-}
-
-export function makeid(length: number): string {
-  let result = '';
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
 }
 
 export function isValidUrl(s) {
@@ -184,19 +172,4 @@ export function writeBinary(path: string, data: Uint8Array): void {
   const stream = fs.createWriteStream(path);
   stream.write(data);
   stream.end();
-}
-
-export async function parseSwapRequest(messageOrPath: string): Promise<any> {
-  try {
-    const message = await readBinary(messageOrPath);
-    const swapRequest = Swap.parse({ message, type: 'SwapRequest' });
-    return JSON.parse(swapRequest);
-  } catch (ignore) {
-    try {
-      const swapRequest = JSON.parse(messageOrPath);
-      return swapRequest;
-    } catch (ignore) {
-      return error('Not a valid SwapRequest message');
-    }
-  }
 }
