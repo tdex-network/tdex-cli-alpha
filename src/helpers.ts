@@ -154,10 +154,6 @@ export class OperatorClient {
   }
 }
 
-export function datadir(): string {
-  return process.env.TDEX_CLIPATH || PathModule.resolve(os.homedir(), '.tdex');
-}
-
 export function readBinary(path: string): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     let out: Uint8Array = new Uint8Array();
@@ -172,4 +168,15 @@ export function writeBinary(path: string, data: Uint8Array): void {
   const stream = fs.createWriteStream(path);
   stream.write(data);
   stream.end();
+}
+
+export function fileExists(path: string): boolean {
+  try {
+    if (fs.existsSync(path)) {
+      return true;
+    }
+    return false;
+  } catch (ignore) {
+    return false;
+  }
 }
