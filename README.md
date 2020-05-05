@@ -33,9 +33,9 @@ $ tdex-cli help
 
 ```sh
 # Mainnet
-$ tdex-cli netwrok liquid
+$ tdex-cli network liquid
 # Public regtest Nigiri
-$ tdex-cli netwrok regtest
+$ tdex-cli network regtest
 # Local Nigiri or Electrum REST server
 $ tdex-cli network regtest --explorer localhost:3001
 ```
