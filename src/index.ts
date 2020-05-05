@@ -61,14 +61,6 @@ program
   .action(connectAction);
 
 /**
- * Trade
- */
-program
-  .command('trade')
-  .description('Make a trade proposal')
-  .action(tradeAction);
-
-/**
  * Market
  */
 
@@ -104,7 +96,7 @@ wallet
 /**
  * swap
  */
-const swap = program.command('swap');
+const swap = program.command('swap').description('Interact with swap messages');
 
 swap
   .command('request')
@@ -143,6 +135,14 @@ swap
   )
   .description('Parse and complete a given SwapAccept message')
   .action(swapCompleteAction);
+
+/**
+ * Trade
+ */
+program
+  .command('trade')
+  .description('Make a trade proposal')
+  .action(tradeAction);
 
 /**
  * operator
