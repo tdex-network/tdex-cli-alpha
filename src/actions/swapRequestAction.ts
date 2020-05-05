@@ -29,12 +29,12 @@ export default function (cmdObj: any): void {
   if (!wallet.selected)
     return error('A wallet is required. Create or restore with wallet command');
 
+  const baseAssetTicker = market.tickers[market.assets.baseAsset];
+  const quoteAssetTicker = market.tickers[market.assets.quoteAsset];
   const toggle = new Toggle({
-    message: `Do you want to buy or sell ${
-      market.tickers[market.assets.baseAsset]
-    }?`,
-    enabled: 'BUY',
-    disabled: 'SELL',
+    message: `Which asset do you want to send?`,
+    enabled: baseAssetTicker,
+    disabled: quoteAssetTicker,
   });
   const amount = (message: string) =>
     new NumberPrompt({
@@ -51,15 +51,13 @@ export default function (cmdObj: any): void {
     amountToBeSent: number,
     amountToReceive: number,
     swapRequest: any,
-    swapRequestFile: string,
-    isBuyType: boolean;
+    swapRequestFile: string;
 
   toggle
     .run()
-    .then((_isBuyType: boolean) => {
-      isBuyType = _isBuyType;
+    .then((isBaseAssetTicker: boolean) => {
       const { baseAsset, quoteAsset } = market.assets;
-      if (isBuyType) {
+      if (!isBaseAssetTicker) {
         toBeSent = quoteAsset;
         toReceive = baseAsset;
       } else {
@@ -67,26 +65,14 @@ export default function (cmdObj: any): void {
         toReceive = quoteAsset;
       }
 
-      return amount(
-        `How much do you want to ${isBuyType ? 'buy' : 'sell'}?`
-      ).run();
+      return amount(`How much do you want to send?`).run();
     })
     .then((inputAmount: number) => {
-      if (isBuyType) amountToReceive = toSatoshi(inputAmount);
-      else amountToBeSent = toSatoshi(inputAmount);
-      const { quoteAsset } = market.assets;
-      return amount(
-        `How much of ${market.tickers[quoteAsset]} do you want to ${
-          isBuyType ? 'sell' : 'buy'
-        }?`
-      ).run();
+      amountToBeSent = toSatoshi(inputAmount);
+      return amount(`How much do you want to receive?`).run();
     })
     .then((outputAmount: number) => {
-      if (isBuyType) amountToBeSent = toSatoshi(outputAmount);
-      else amountToReceive = toSatoshi(outputAmount);
-      return Promise.resolve();
-    })
-    .then(() => {
+      amountToReceive = toSatoshi(outputAmount);
       log(
         `Gotcha! You will send ${market.tickers[toBeSent]} ${fromSatoshi(
           amountToBeSent
@@ -94,7 +80,6 @@ export default function (cmdObj: any): void {
           amountToReceive
         )}`
       );
-
       return confirm.run();
     })
     .then((keepGoing: boolean) => {
