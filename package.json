@@ -30,15 +30,12 @@
     "chalk": "^3.0.0",
     "commander": "^5.0.0",
     "enquirer": "^2.3.4",
-    "google-protobuf": "^3.11.4",
-    "liquidjs-lib": "vulpemventures/liquidjs-lib",
     "tdex-protobuf": "sevenlab/tdex-protobuf",
     "tdex-sdk": "sevenlab/tdex-sdk"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
     "@types/commander": "^2.12.2",
-    "@types/google-protobuf": "^3.7.2",
     "@types/inquirer": "^6.5.0",
     "@types/node": "^12.12.31",
     "@types/ora": "^3.2.0",
