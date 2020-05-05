@@ -5,7 +5,7 @@ import { Wallet, WalletInterface, fetchUtxos, Swap } from 'tdex-sdk';
 import { info, log, error, success } from '../logger';
 import State from '../state';
 import { decrypt } from '../crypto';
-import { TAXI_API_URL, readBinary, writeBinary } from '../helpers';
+import { TAXI_API_URL, readBinary, writeBinary, fileExists } from '../helpers';
 //eslint-disable-next-line
 const { Confirm, Password } = require('enquirer');
 
@@ -20,10 +20,17 @@ const password = new Password({
   message: 'Type your password',
 });
 
-export default async function (path: string, cmdObj: any): Promise<void> {
+export default async function (cmdObj: any): Promise<void> {
   info('=========*** Swap ***==========\n');
 
   const { wallet, network } = state.get();
+
+  let swapRequestFile: string;
+  if (cmdObj.file) {
+    swapRequestFile = PathModule.resolve(cmdObj.file);
+  } else {
+    swapRequestFile = PathModule.resolve(process.cwd(), 'swap_request.bin');
+  }
 
   if (!network.selected) return error('Select a valid network first');
 
@@ -32,18 +39,22 @@ export default async function (path: string, cmdObj: any): Promise<void> {
       'A wallet is required. Create or restoste with wallet command'
     );
 
-  if (!path || !PathModule.isAbsolute(path)) {
-    return error('Path must be absolute');
+  if (!fileExists(swapRequestFile)) {
+    return error('File is not valid or does not exist');
   }
 
-  if (cmdObj.output && !PathModule.isAbsolute(cmdObj.output))
-    return error('Path must be asbolute if specified');
+  if (
+    cmdObj.output &&
+    (!cmdObj.output.endsWith('.bin') ||
+      !fileExists(PathModule.dirname(PathModule.resolve(cmdObj.output))))
+  )
+    return error('Output path id not valid');
 
   let swapRequest: any,
     serializedSwapRequest: Uint8Array,
     walletInstance: WalletInterface;
 
-  readBinary(path)
+  readBinary(swapRequestFile)
     .then((data: Uint8Array) => {
       serializedSwapRequest = data;
       const json = Swap.parse({
@@ -121,10 +132,12 @@ export default async function (path: string, cmdObj: any): Promise<void> {
       });
 
       const defaultPath = PathModule.resolve(
-        PathModule.dirname(path),
-        `${JSON.parse(json).id}.bin`
+        PathModule.dirname(swapRequestFile),
+        'swap_accept.bin'
       );
-      const file = cmdObj.output ? cmdObj.output : defaultPath;
+      const file = cmdObj.output
+        ? PathModule.resolve(cmdObj.output)
+        : defaultPath;
       writeBinary(file, swapAccept);
       success(`SwapAccept message saved into ${file}`);
 

@@ -3,7 +3,7 @@ import { Swap, WatchOnlyWallet, fetchUtxos, networks } from 'tdex-sdk';
 
 import { info, log, error, success } from '../logger';
 import State from '../state';
-import { fromSatoshi, toSatoshi, datadir, writeBinary } from '../helpers';
+import { fromSatoshi, toSatoshi, writeBinary, fileExists } from '../helpers';
 //eslint-disable-next-line
 const { Toggle, NumberPrompt, Confirm } = require('enquirer');
 
@@ -14,8 +14,12 @@ export default function (cmdObj: any): void {
 
   const { wallet, market, network } = state.get();
 
-  if (cmdObj.output && !PathModule.isAbsolute(cmdObj.output))
-    return error('Path must be asbolute if specified');
+  if (
+    cmdObj.output &&
+    (!cmdObj.output.endsWith('.bin') ||
+      !fileExists(PathModule.dirname(PathModule.resolve(cmdObj.output))))
+  )
+    return error('Output path id not valid');
 
   if (!network.selected) return error('Select a valid network first');
 
@@ -116,11 +120,9 @@ export default function (cmdObj: any): void {
         message: swapRequest,
         type: 'SwapRequest',
       });
-      const defaultPath = PathModule.resolve(
-        datadir(),
-        `${JSON.parse(json).id}.bin`
-      );
-      const file = cmdObj.output ? cmdObj.output : defaultPath;
+      const file = cmdObj.output
+        ? PathModule.resolve(cmdObj.output)
+        : PathModule.resolve(process.cwd(), 'swap_request.bin');
 
       writeBinary(file, swapRequest);
       success(`SwapRequest message saved into ${file}`);
