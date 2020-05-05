@@ -51,11 +51,13 @@ export default function (cmdObj: any): void {
     amountToBeSent: number,
     amountToReceive: number,
     swapRequest: any,
-    swapRequestFile: string;
+    swapRequestFile: string,
+    isBuyType: boolean;
 
   toggle
     .run()
-    .then((isBuyType: boolean) => {
+    .then((_isBuyType: boolean) => {
+      isBuyType = _isBuyType;
       const { baseAsset, quoteAsset } = market.assets;
       if (isBuyType) {
         toBeSent = quoteAsset;
@@ -65,27 +67,32 @@ export default function (cmdObj: any): void {
         toReceive = quoteAsset;
       }
 
-      if (isBuyType) {
-        throw new Error('Buy type not supported yet');
-      }
-
-      return amount(`How much do you want to send?`).run();
+      return amount(
+        `How much do you want to ${isBuyType ? 'buy' : 'sell'}?`
+      ).run();
     })
     .then((inputAmount: number) => {
-      amountToBeSent = inputAmount;
-      return amount(`How much do you want to receive?`).run();
+      if (isBuyType) amountToReceive = toSatoshi(inputAmount);
+      else amountToBeSent = toSatoshi(inputAmount);
+      const { quoteAsset } = market.assets;
+      return amount(
+        `How much of ${market.tickers[quoteAsset]} do you want to ${
+          isBuyType ? 'sell' : 'buy'
+        }?`
+      ).run();
     })
     .then((outputAmount: number) => {
-      amountToReceive = toSatoshi(outputAmount);
+      if (isBuyType) amountToBeSent = toSatoshi(outputAmount);
+      else amountToReceive = toSatoshi(outputAmount);
       return Promise.resolve();
     })
     .then(() => {
       log(
-        `Gotcha! You will send ${
-          market.tickers[toBeSent]
-        } ${amountToBeSent} and receive ${
-          market.tickers[toReceive]
-        } ${fromSatoshi(amountToReceive)}`
+        `Gotcha! You will send ${market.tickers[toBeSent]} ${fromSatoshi(
+          amountToBeSent
+        )} and receive ${market.tickers[toReceive]} ${fromSatoshi(
+          amountToReceive
+        )}`
       );
 
       return confirm.run();
@@ -103,7 +110,7 @@ export default function (cmdObj: any): void {
       const psbtBase64 = woWallet.updateTx(
         emptyPsbt,
         utxos,
-        toSatoshi(amountToBeSent),
+        amountToBeSent,
         amountToReceive,
         toBeSent,
         toReceive
@@ -111,11 +118,11 @@ export default function (cmdObj: any): void {
 
       const swap = new Swap();
       swapRequest = swap.request({
-        assetToBeSent: toBeSent,
-        amountToBeSent: toSatoshi(amountToBeSent),
-        assetToReceive: toReceive,
-        amountToReceive: amountToReceive,
         psbtBase64,
+        amountToBeSent,
+        amountToReceive,
+        assetToBeSent: toBeSent,
+        assetToReceive: toReceive,
       });
 
       swapRequestFile = cmdObj.output
