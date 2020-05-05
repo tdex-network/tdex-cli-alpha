@@ -6,7 +6,7 @@ const state = new State();
 export default function (): void {
   info('=========*** Wallet ***==========\n');
 
-  const { wallet, network } = state.get();
+  const { wallet, network, market } = state.get();
 
   if (!wallet.selected)
     return error(
@@ -20,7 +20,7 @@ export default function (): void {
     if (entries.length === 0) return log('No transactions found.');
 
     entries.forEach(([asset, balance]) => {
-      let title = 'Unknown';
+      let title = market.tickers[asset] || 'Unknown';
       if (asset === (networks as any)[network.chain].assetHash) title = 'LBTC';
 
       success(`*** ${title} ***`);
