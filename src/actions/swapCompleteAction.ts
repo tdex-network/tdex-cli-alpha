@@ -1,3 +1,4 @@
+import axios from 'axios';
 import * as PathModule from 'path';
 import { Wallet, WalletInterface, Swap } from 'tdex-sdk';
 
@@ -93,8 +94,26 @@ export default function (path: string, cmdObj: any): void {
       writeBinary(file, swapComplete);
       success(`SwapComplete message saved into ${file}`);
 
-      if (cmdObj.push)
-        log(`\nSigned transaction (hex format)\n\n${Wallet.toHex(signedPsbt)}`);
+      let execute = () => Promise.resolve();
+
+      if (cmdObj.push) {
+        const options = {
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        };
+
+        execute = () =>
+          axios.post(
+            `${network.explorer}/tx`,
+            Wallet.toHex(signedPsbt),
+            options
+          );
+      }
+      return execute();
+    })
+    .then((txIdOrNothing: any) => {
+      if (txIdOrNothing) log(`\nTransaction: ${txIdOrNothing.data}`);
     })
     .catch(error);
 }
