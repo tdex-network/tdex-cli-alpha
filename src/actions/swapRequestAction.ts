@@ -4,17 +4,10 @@ import { Swap, WatchOnlyWallet, fetchUtxos, networks } from 'tdex-sdk';
 import { info, log, error, success } from '../logger';
 import State from '../state';
 import { fromSatoshi, toSatoshi, datadir, writeBinary } from '../helpers';
-
-const state = new State();
 //eslint-disable-next-line
 const { Toggle, NumberPrompt, Confirm } = require('enquirer');
 
-// 1. Fetch utxos
-// 2. CHeck if input amount is enough
-// 3. AMOUNT_P of ASSET_P and receiving AMOUNT_R of ASSET_R
-// 4. Send SwapRequest message and parse SwapAccept message
-// 5. Sign the final psbt
-// 6. Send SwapComplete back
+const state = new State();
 
 export default function (cmdObj: any): void {
   info('=========*** Swap ***==========\n');
@@ -123,16 +116,17 @@ export default function (cmdObj: any): void {
         message: swapRequest,
         type: 'SwapRequest',
       });
+      const defaultPath = PathModule.resolve(
+        datadir(),
+        `${JSON.parse(json).id}.bin`
+      );
+      const file = cmdObj.output ? cmdObj.output : defaultPath;
+
+      writeBinary(file, swapRequest);
+      success(`SwapRequest message saved into ${file}`);
+
       if (cmdObj.print) {
-        success(`\nSwapRequest message\n\n${json}`);
-      } else {
-        const defaultPath = PathModule.resolve(
-          datadir(),
-          `${JSON.parse(json).id}.bin`
-        );
-        const file = cmdObj.output ? cmdObj.output : defaultPath;
-        writeBinary(file, swapRequest);
-        success(`SwapRequest message saved into ${file}`);
+        log(`\nSwapRequest message\n\n${json}`);
       }
     })
     .catch(error);
