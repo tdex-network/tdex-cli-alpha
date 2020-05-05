@@ -49,7 +49,9 @@ export default function (cmdObj: any): void {
   let toBeSent: string,
     toReceive: string,
     amountToBeSent: number,
-    amountToReceive: number;
+    amountToReceive: number,
+    swapRequest: any,
+    swapRequestFile: string;
 
   toggle
     .run()
@@ -108,7 +110,7 @@ export default function (cmdObj: any): void {
       );
 
       const swap = new Swap();
-      const swapRequest = swap.request({
+      swapRequest = swap.request({
         assetToBeSent: toBeSent,
         amountToBeSent: toSatoshi(amountToBeSent),
         assetToReceive: toReceive,
@@ -116,18 +118,20 @@ export default function (cmdObj: any): void {
         psbtBase64,
       });
 
-      const json = Swap.parse({
-        message: swapRequest,
-        type: 'SwapRequest',
-      });
-      const file = cmdObj.output
+      swapRequestFile = cmdObj.output
         ? PathModule.resolve(cmdObj.output)
         : PathModule.resolve(process.cwd(), 'swap_request.bin');
 
-      writeBinary(file, swapRequest);
-      success(`SwapRequest message saved into ${file}`);
+      return writeBinary(swapRequestFile, swapRequest);
+    })
+    .then(() => {
+      success(`SwapRequest message saved into ${swapRequestFile}`);
 
       if (cmdObj.print) {
+        const json = Swap.parse({
+          message: swapRequest,
+          type: 'SwapRequest',
+        });
         log(`\nSwapRequest message\n\n${json}`);
       }
     })

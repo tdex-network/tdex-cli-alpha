@@ -51,7 +51,9 @@ export default function (cmdObj: any): void {
 
   let swapAccept: any,
     serializedSwapAccept: Uint8Array,
-    walletInstance: WalletInterface;
+    walletInstance: WalletInterface,
+    psbtBase64: string,
+    swapCompleteFile: string;
 
   readBinary(swapAcceptFile)
     .then((data: Uint8Array) => {
@@ -88,6 +90,7 @@ export default function (cmdObj: any): void {
     .then((signedPsbt: string) => {
       success('\n√ Done\n');
 
+      psbtBase64 = signedPsbt;
       const swap = new Swap({ chain: network.chain });
       const swapComplete = swap.complete({
         message: serializedSwapAccept,
@@ -98,11 +101,13 @@ export default function (cmdObj: any): void {
         PathModule.dirname(swapAcceptFile),
         'swap_completed.bin'
       );
-      const file = cmdObj.output
+      swapCompleteFile = cmdObj.output
         ? PathModule.resolve(cmdObj.output)
         : defaultPath;
-      writeBinary(file, swapComplete);
-      success(`SwapComplete message saved into ${file}`);
+      return writeBinary(swapCompleteFile, swapComplete);
+    })
+    .then(() => {
+      success(`SwapComplete message saved into ${swapCompleteFile}`);
 
       let execute = () => Promise.resolve();
 
@@ -116,7 +121,7 @@ export default function (cmdObj: any): void {
         execute = () =>
           axios.post(
             `${network.explorer}/tx`,
-            Wallet.toHex(signedPsbt),
+            Wallet.toHex(psbtBase64),
             options
           );
       }

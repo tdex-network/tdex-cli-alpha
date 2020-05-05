@@ -52,7 +52,9 @@ export default async function (cmdObj: any): Promise<void> {
 
   let swapRequest: any,
     serializedSwapRequest: Uint8Array,
-    walletInstance: WalletInterface;
+    walletInstance: WalletInterface,
+    swapAccept: any,
+    swapAcceptFile: string;
 
   readBinary(swapRequestFile)
     .then((data: Uint8Array) => {
@@ -122,26 +124,28 @@ export default async function (cmdObj: any): Promise<void> {
       success('\n√ Done\n');
 
       const swap = new Swap({ chain: network.chain });
-      const swapAccept = swap.accept({
+      swapAccept = swap.accept({
         message: serializedSwapRequest,
         psbtBase64: signedPsbt,
-      });
-      const json = Swap.parse({
-        message: swapAccept,
-        type: 'SwapAccept',
       });
 
       const defaultPath = PathModule.resolve(
         PathModule.dirname(swapRequestFile),
         'swap_accept.bin'
       );
-      const file = cmdObj.output
+      swapAcceptFile = cmdObj.output
         ? PathModule.resolve(cmdObj.output)
         : defaultPath;
-      writeBinary(file, swapAccept);
-      success(`SwapAccept message saved into ${file}`);
+      return writeBinary(swapAcceptFile, swapAccept);
+    })
+    .then(() => {
+      success(`SwapAccept message saved into ${swapAcceptFile}`);
 
       if (cmdObj.print) {
+        const json = Swap.parse({
+          message: swapAccept,
+          type: 'SwapAccept',
+        });
         log(`\nSwapAccept message\n\n${json}`);
       }
     })

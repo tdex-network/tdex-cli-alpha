@@ -164,10 +164,17 @@ export function readBinary(path: string): Promise<Uint8Array> {
   });
 }
 
-export function writeBinary(path: string, data: Uint8Array): void {
-  const stream = fs.createWriteStream(path);
-  stream.write(data);
-  stream.end();
+export function writeBinary(path: string, data: Uint8Array): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      const stream = fs.createWriteStream(path);
+      stream.write(data);
+      stream.end();
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
 export function fileExists(path: string): boolean {
