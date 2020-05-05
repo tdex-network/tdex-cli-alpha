@@ -110,20 +110,29 @@ swap
   .command('request')
   .option('-p, --print', 'Print to stdout', false)
   .option(
-    '-o, --output <path/to/file>',
-    'Set a diffent path where to save the file'
+    '-o, --output <file>',
+    'Set a diffent path where to save the file (defaults to datadir)'
   )
   .description('Make a swap proposal')
   .action(swapRequestAction);
 
 swap
-  .command('accept <message>')
+  .command('accept <file>')
+  .option('-p, --print', 'Print to stdout', false)
+  .option(
+    '-o, --output <file>',
+    'Set a diffent path where to save the file. (defaults to the same folder of SwapRequest file)'
+  )
   .description('Parse and accept a given SwapRequest message')
   .action(swapAcceptAction);
 
 swap
-  .command('complete <message>')
+  .command('complete <file>')
   .option('-p, --push', 'Extract hex string and broadcast to the chain')
+  .option(
+    '-o, --output <file>',
+    'Set a diffent path where to save the file. (defaults to the same folder of SwapAccept file)'
+  )
   .description('Parse and complete a given SwapAccept message')
   .action(swapCompleteAction);
 
