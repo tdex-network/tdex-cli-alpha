@@ -45,6 +45,8 @@ export default function (cmdObj: any): void {
     name: 'question',
     message: 'Are you sure continue?',
   });
+  const isValidAmount = (amount: number): boolean =>
+    !(amount <= 0 || !Number.isSafeInteger(amount));
 
   let toBeSent: string,
     toReceive: string,
@@ -69,10 +71,14 @@ export default function (cmdObj: any): void {
     })
     .then((inputAmount: number) => {
       amountToBeSent = toSatoshi(inputAmount);
+      if (!isValidAmount(amountToBeSent))
+        return Promise.reject(new Error('Amount is not valid'));
       return amount(`How much do you want to receive?`).run();
     })
     .then((outputAmount: number) => {
       amountToReceive = toSatoshi(outputAmount);
+      if (!isValidAmount(amountToReceive))
+        return Promise.reject(new Error('Amount is not valid'));
       log(
         `Gotcha! You will send ${market.tickers[toBeSent]} ${fromSatoshi(
           amountToBeSent
