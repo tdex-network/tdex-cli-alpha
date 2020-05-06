@@ -39,6 +39,10 @@ export default function (cmdObj: any): void {
       'A wallet is required. Create or restoste with wallet command'
     );
 
+  if (!fileExists(swapAcceptFile)) {
+    return error('File is not valid or does not exist');
+  }
+
   if (
     cmdObj.output &&
     (!cmdObj.output.endsWith('.bin') ||
