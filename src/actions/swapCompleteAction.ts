@@ -134,5 +134,5 @@ export default function (cmdObj: any): void {
     .then((txIdOrNothing: any) => {
       if (txIdOrNothing) log(`\nTransaction: ${txIdOrNothing.data}`);
     })
-    .catch(() => ({}));
+    .catch(error);
 }
