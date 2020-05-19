@@ -1,3 +1,4 @@
+import axios from 'axios';
 import * as PathModule from 'path';
 import { Swap, WatchOnlyWallet, fetchUtxos, networks } from 'tdex-sdk';
 
@@ -5,14 +6,14 @@ import { info, log, error, success } from '../logger';
 import State from '../state';
 import { fromSatoshi, toSatoshi, writeBinary, fileExists } from '../helpers';
 //eslint-disable-next-line
-const { Toggle, NumberPrompt, Confirm } = require('enquirer');
+const { NumberPrompt, Confirm, Form } = require('enquirer');
 
 const state = new State();
 
 export default function (cmdObj: any): void {
   info('=========*** Swap ***==========\n');
 
-  const { wallet, market, network } = state.get();
+  const { wallet, network } = state.get();
 
   if (
     cmdObj.output &&
@@ -23,19 +24,19 @@ export default function (cmdObj: any): void {
 
   if (!network.selected) return error('Select a valid network first');
 
-  if (!market.selected)
-    return error('A market is required. Select one with market <pair> command');
-
   if (!wallet.selected)
     return error('A wallet is required. Create or restore with wallet command');
 
-  const baseAssetTicker = market.tickers[market.assets.baseAsset];
-  const quoteAssetTicker = market.tickers[market.assets.quoteAsset];
-  const toggle = new Toggle({
-    message: `Which asset do you want to send?`,
-    enabled: baseAssetTicker,
-    disabled: quoteAssetTicker,
+  const assets = new Form({
+    name: 'assets',
+    message:
+      'Please provide the assets (move with up/down arrow and then Enter)',
+    choices: [
+      { name: 'toBeSent', message: 'Which asset do you want to send?' },
+      { name: 'toReceive', message: 'Which asset do you want to receive?' },
+    ],
   });
+
   const amount = (message: string) =>
     new NumberPrompt({
       name: 'number',
@@ -55,18 +56,24 @@ export default function (cmdObj: any): void {
     swapRequest: any,
     swapRequestFile: string;
 
-  toggle
+  assets
     .run()
-    .then((isBaseAssetTicker: boolean) => {
-      const { baseAsset, quoteAsset } = market.assets;
-      if (!isBaseAssetTicker) {
-        toBeSent = quoteAsset;
-        toReceive = baseAsset;
-      } else {
-        toBeSent = baseAsset;
-        toReceive = quoteAsset;
-      }
+    .then((answers: any) => {
+      if (!answers.toBeSent || !answers.toReceive) throw 'Empty asset';
 
+      toBeSent = answers.toBeSent;
+      toReceive = answers.toReceive;
+
+      //TODO store and show the ticker to the user
+      const promises = [
+        axios.get(`${network.explorer}/asset/${answers.toBeSent}`),
+        axios.get(`${network.explorer}/asset/${answers.toReceive}`),
+      ];
+      return Promise.all(promises).catch(() => {
+        throw 'Asset hash does not exist';
+      });
+    })
+    .then(() => {
       return amount(`How much do you want to send?`).run();
     })
     .then((inputAmount: number) => {
@@ -79,12 +86,15 @@ export default function (cmdObj: any): void {
       amountToReceive = toSatoshi(outputAmount);
       if (!isValidAmount(amountToReceive))
         return Promise.reject(new Error('Amount is not valid'));
+      const previewLength = 4;
       log(
-        `Gotcha! You will send ${market.tickers[toBeSent]} ${fromSatoshi(
-          amountToBeSent
-        )} and receive ${market.tickers[toReceive]} ${fromSatoshi(
-          amountToReceive
-        )}`
+        `Gotcha! You will send ${toBeSent.substring(
+          0,
+          previewLength
+        )} ${fromSatoshi(amountToBeSent)} and receive ${toReceive.substring(
+          0,
+          previewLength
+        )} ${fromSatoshi(amountToReceive)}`
       );
       return confirm.run();
     })
