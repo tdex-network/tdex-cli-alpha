@@ -26,6 +26,7 @@
     "unit": "npx mocha tests/**/*.js"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.0.4",
     "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "commander": "^5.0.0",
