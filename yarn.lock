@@ -3983,11 +3983,11 @@ tar-stream@^1.5.2:
 
 tdex-protobuf@sevenlab/tdex-protobuf:
   version "1.0.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#a9cfbc5a2588bde05a429152f9efbee415b82416"
+  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#ee2ac7dfbcfcf398d6d26fd3d13aa8d8b6e4f35c"
 
 tdex-sdk@sevenlab/tdex-sdk:
   version "0.1.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-sdk.git#e9dd6fc0cfbc9606de5e1ba2eb4c4062395f4df0"
+  resolved "git+ssh://git@github.com/sevenlab/tdex-sdk.git#b347b2e8430dbd68ffd930f7cf62126344c03f6d"
   dependencies:
     "@grpc/grpc-js" "^1.0.4"
     "@types/google-protobuf" "^3.7.2"
