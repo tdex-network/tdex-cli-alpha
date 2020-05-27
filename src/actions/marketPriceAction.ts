@@ -41,13 +41,8 @@ export default function (): void {
         minimumFractionDigits: 0,
         maximumFractionDigits: 8,
       });
-      const previewLength = 4;
-
       success(
-        `1 ${firstAsset.substring(
-          0,
-          previewLength
-        )} is equal to ${price} ${secondAsset.substring(0, previewLength)}`
+        `1 ${market.tickers[firstAsset]} is equal to ${price} ${market.tickers[secondAsset]}`
       );
     })
     .catch(error);

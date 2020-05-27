@@ -1,12 +1,13 @@
+import { fetchBalances } from 'tdex-sdk';
 import { info, log, error, success } from '../logger';
+import { fetchTicker } from '../helpers';
 import State from '../state';
-import { networks, fetchBalances } from 'tdex-sdk';
 const state = new State();
 
 export default function (): void {
   info('=========*** Wallet ***==========\n');
 
-  const { wallet, network, market } = state.get();
+  const { wallet, network } = state.get();
 
   if (!wallet.selected)
     return error(
@@ -19,14 +20,22 @@ export default function (): void {
 
     if (entries.length === 0) return log('No transactions found.');
 
-    entries.forEach(([asset, balance]) => {
-      let title = market.tickers[asset] || 'Unknown';
-      if (asset === (networks as any)[network.chain].assetHash) title = 'LBTC';
-
-      success(`*** ${title} ***`);
-      log(`Balance ${balance}`);
-      log(`Hash ${asset}`);
-      log();
+    const promises = entries.map(([asset, balance]) => {
+      return fetchTicker(asset, network.chain, network.explorer)
+        .then((response) => {
+          const ticker = response || 'Unknown';
+          success(`*** ${ticker} ***`);
+          return;
+        })
+        .catch(() => {
+          success(`*** Unknown ***`);
+        })
+        .finally(() => {
+          log(`Balance ${balance}`);
+          log(`Hash ${asset}`);
+          log();
+        });
     });
+    Promise.all(promises);
   });
 }

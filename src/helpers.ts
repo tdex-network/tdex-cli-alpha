@@ -1,6 +1,7 @@
 // @ts-nocheck
 import axios from 'axios';
 import { URL } from 'url';
+import { networks } from 'tdex-sdk';
 import * as grpc from '@grpc/grpc-js';
 
 import * as services from 'tdex-protobuf/js/operator_grpc_pb';
@@ -34,29 +35,36 @@ export function fromSatoshi(x: number): number {
   );
 }
 
+export async function fetchTicker(
+  asset: string,
+  chain: string,
+  url: string
+): Promise<any> {
+  if (asset === (networks as any)[chain].assetHash) return 'L-BTC';
+  try {
+    const res = await axios.get(`${url}/asset/${asset}`);
+    return res.data.ticker;
+  } catch (ignore) {
+    return undefined;
+  }
+}
+
 export async function tickersFromMarkets(
   markets: Array<any>,
+  chain: string,
   url: string
 ): Promise<any> {
   const marketsByTicker: any = {};
-  const fetchTicker = async (asset: string, url: string): Promise<any> => {
-    try {
-      const res = await axios.get(`${url}/asset/${asset}`);
-      return res.data.ticker;
-    } catch (ignore) {
-      return undefined;
-    }
-  };
   let baseAssetTicker: string;
 
   for (let i = 0; i < markets.length; ++i) {
     const { baseAsset, quoteAsset } = markets[i];
     const previewLength = 4;
     if (!baseAssetTicker) {
-      const ticker = await fetchTicker(baseAsset, url);
+      const ticker = await fetchTicker(baseAsset, chain, url);
       baseAssetTicker = ticker || baseAsset.substring(0, previewLength);
     }
-    const ticker = await fetchTicker(quoteAsset, url);
+    const ticker = await fetchTicker(quoteAsset, chain, url);
     const quoteAssetTicker = ticker || quoteAsset.substring(0, previewLength);
     const pair = `${baseAssetTicker}-${quoteAssetTicker}`;
     marketsByTicker[pair] = {

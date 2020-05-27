@@ -19,7 +19,9 @@ export default function (endpoint: string): void {
   const client = new TraderClient(endpoint);
   client
     .markets()
-    .then((markets) => tickersFromMarkets(markets, network.explorer))
+    .then((markets) =>
+      tickersFromMarkets(markets, network.chain, network.explorer)
+    )
     .then((marketsByTicker) => {
       const pairs = Object.keys(marketsByTicker);
 
