@@ -109,7 +109,7 @@ export class OperatorClient {
   waitForReady(): Promise<any> {
     return new Promise((resolve, reject) => {
       const deadline = new Date();
-      deadline.setSeconds(deadline.getSeconds() + 3);
+      deadline.setSeconds(deadline.getSeconds() + 15);
       this.client.waitForReady(deadline, (err) => {
         if (err) return reject(err);
         resolve();
