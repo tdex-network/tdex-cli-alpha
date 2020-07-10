@@ -53,7 +53,8 @@ export default function (): void {
   const type = new enquirer.Select({
     type: 'select',
     name: 'type',
-    message: 'A new wallet will be created. How do you want to store your private key? 🔑',
+    message:
+      'A new wallet will be created. How do you want to store your private key? 🔑',
     choices: [
       { name: 'encrypted', message: 'Encrypted (AES-128-CBC)' }, //<= choice object
       { name: 'plain', message: 'Plain Text (not recommended)' }, //<= choice object
