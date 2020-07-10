@@ -11,7 +11,7 @@ export default function (): void {
 
   if (!wallet.selected)
     return error(
-      'A wallet is required. Create or restoste with the wallet command'
+      'A wallet is required. Create or restore with the wallet command'
     );
 
   //Get balance with the explorer
@@ -31,7 +31,7 @@ export default function (): void {
           success(`*** Unknown ***`);
         })
         .finally(() => {
-          log(`Balance ${balance}`);
+          log(`Balance ${balance} satoshis `);
           log(`Hash ${asset}`);
           log();
         });

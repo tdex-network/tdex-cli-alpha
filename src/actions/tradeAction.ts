@@ -83,7 +83,7 @@ export default function () {
       }
 
       return amount(
-        `How much do you want to ${isBuyType ? 'buy' : 'sell'}?`
+        `How much do you want to ${isBuyType ? 'buy' : 'sell'} (eg. 0.05)?`
       ).run();
     })
     .then((inputAmount: number) => {

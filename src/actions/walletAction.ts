@@ -1,4 +1,4 @@
-import { info, log, error } from '../logger';
+import { info, log, error, success } from '../logger';
 import { Wallet, WalletInterface } from 'tdex-sdk';
 import { encrypt } from '../crypto';
 //eslint-disable-next-line
@@ -27,6 +27,11 @@ function setWalletState(
       },
     },
   });
+  log();
+  success(`Wallet has been created/restored successfully`);
+  log();
+  log(`Be sure to backup your data directory before sending any funds`);
+  log(`Wallet address: ${address}`);
 }
 
 export default function (): void {
@@ -48,7 +53,8 @@ export default function (): void {
   const type = new enquirer.Select({
     type: 'select',
     name: 'type',
-    message: 'How do you want to store your private key? 🔑',
+    message:
+      'A new wallet will be created. How do you want to store your private key? 🔑',
     choices: [
       { name: 'encrypted', message: 'Encrypted (AES-128-CBC)' }, //<= choice object
       { name: 'plain', message: 'Plain Text (not recommended)' }, //<= choice object

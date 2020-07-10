@@ -1,5 +1,5 @@
 // Helpers
-import { info, log, error } from '../logger';
+import { info, log, error, success } from '../logger';
 import { isValidUrl, OperatorClient } from '../helpers';
 // State
 import State from '../state';
@@ -23,7 +23,12 @@ export default function (endpoint: string): void {
         },
       });
 
-      return log(`Current operator endpoint: ${endpoint}`);
+      success(`Connection to the given daemon has been successful!`);
+      log(
+        `Every operator sub-command, such as operator deposit, will be run against this daemon endpoint`
+      );
+      log(`Current daemon endpoint: ${endpoint}`);
+      return;
     })
     .catch(error);
 }
