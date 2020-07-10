@@ -19,14 +19,14 @@ export default function (cmdObj: any): void {
     grpc
       .feeDepositAddress()
       .then((address: string) => {
-        return log(`[Fee] wallet address: ${address}`);
+        return log(`[Fee] address: ${address}`);
       })
       .catch(error);
   } else {
     grpc
       .depositAddress()
       .then((address: string) => {
-        return log(`[Market] wallet address: ${address}`);
+        return log(`[Market] address: ${address}`);
       })
       .catch(error);
   }
