@@ -34,7 +34,7 @@ export default function (endpoint: string): void {
         },
       });
 
-      success(`Connection to the given provider has been succesful!`);
+      success(`Connection to the given provider has been successful!`);
       log(
         `Every command, such as market and trade, will be run against this provider`
       );

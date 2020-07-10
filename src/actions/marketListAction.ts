@@ -32,6 +32,9 @@ export default function (): void {
           markets: marketsByTicker,
         },
       });
+
+      if (pairs.length === 0) return log(`No tradable markets found`);
+
       pairs.forEach((p) =>
         p === market.pair ? success(`${p} (selected)`) : log(p)
       );
