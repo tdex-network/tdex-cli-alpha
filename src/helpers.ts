@@ -40,7 +40,7 @@ export async function fetchTicker(
   chain: string,
   url: string
 ): Promise<any> {
-  if (asset === (networks as any)[chain].assetHash) return 'L-BTC';
+  if (asset === (networks as any)[chain].assetHash) return 'LBTC';
   try {
     const res = await axios.get(`${url}/asset/${asset}`);
     return res.data.ticker;
