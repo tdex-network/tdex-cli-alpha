@@ -31,7 +31,7 @@ export default function (): void {
           success(`*** Unknown ***`);
         })
         .finally(() => {
-          log(`Balance ${balance}`);
+          log(`Balance ${balance} satoshis `);
           log(`Hash ${asset}`);
           log();
         });
