@@ -31,8 +31,8 @@
     "chalk": "^3.0.0",
     "commander": "^5.0.0",
     "enquirer": "^2.3.4",
-    "tdex-protobuf": "sevenlab/tdex-protobuf",
-    "tdex-sdk": "sevenlab/tdex-sdk"
+    "tdex-protobuf": "tdex-network/tdex-protobuf",
+    "tdex-sdk": "tdex-network/tdex-sdk"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
