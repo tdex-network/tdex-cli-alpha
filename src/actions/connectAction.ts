@@ -1,6 +1,6 @@
 import { TraderClient } from 'tdex-sdk';
 // Helpers
-import { info, log, error } from '../logger';
+import { info, log, success, error } from '../logger';
 import { isValidUrl, tickersFromMarkets } from '../helpers';
 // State
 import State from '../state';
@@ -14,7 +14,7 @@ export default function (endpoint: string): void {
   if (!network.selected) return error('Select a valid network');
 
   if (!isValidUrl(endpoint))
-    return error('The provided endpoint URL is not valid');
+    return error('The given endpoint URL is not valid');
 
   const client = new TraderClient(endpoint);
   client
@@ -34,7 +34,12 @@ export default function (endpoint: string): void {
         },
       });
 
-      return log(`Current provider endpoint: ${endpoint}`);
+      success(`Connection to the given provider has been succesful!`);
+      log(
+        `Every command, such as market and trade, will be run against this provider`
+      );
+      log(`Current provider endpoint: ${endpoint}`);
+      return;
     })
     .catch(error);
 }
