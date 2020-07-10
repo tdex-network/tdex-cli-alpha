@@ -21,9 +21,7 @@
     "build-darwin": "yarn build && npx nexe dist/index.js -t darwin-x64 -o tdex-cli-darwin",
     "build-linux": "yarn build &&  npx nexe dist/index.js -t linux-x64 -o tdex-cli-linux",
     "clean": "npx rimraf dist",
-    "lint": "npx tsc --noEmit && npx eslint 'src/**/*.ts' --quiet",
-    "test": "yarn build && yarn unit",
-    "unit": "npx mocha tests/**/*.js"
+    "lint": "npx tsc --noEmit && npx eslint 'src/**/*.ts' --quiet"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.0.4",
@@ -48,7 +46,7 @@
     "eslint-plugin-prettier": "^3.1.3",
     "husky": "^4.2.5",
     "mocha": "^7.1.1",
-    "nexe": "^3.3.2",
+    "nexe": "^3.3.7",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
     "ts-node": "^8.10.2",
