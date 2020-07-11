@@ -18,8 +18,8 @@
   "scripts": {
     "watch": "npx tsc --watch",
     "build": "npx tsc",
-    "build-darwin": "yarn build && npx nexe dist/index.js -t darwin-x64 -o tdex-cli-darwin",
-    "build-linux": "yarn build &&  npx nexe dist/index.js -t linux-x64 -o tdex-cli-linux",
+    "build-mac": "yarn build && npx nexe dist/index.js -t darwin-x64 -o tdex-cli-v$npm_package_version-darwin",
+    "build-linux": "yarn build &&  npx nexe dist/index.js -t linux-x64 -o tdex-cli-v$npm_package_version-linux",
     "clean": "npx rimraf dist",
     "lint": "npx tsc --noEmit && npx eslint 'src/**/*.ts' --quiet"
   },
